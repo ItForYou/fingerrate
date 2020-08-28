@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">FingeRate</string>
+    <string name="home">http://14.48.175.176/~fingerrate/</string>
+    <string name="map">http://14.48.175.176/~fingerrate/bbs/search_tes.php?</string>
+</resources>
