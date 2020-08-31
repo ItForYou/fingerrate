@@ -1,9 +1,16 @@
 package kr.co.itforone.fingerrate;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.work.Data;
+import androidx.work.ListenableWorker;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.Worker;
+import androidx.work.WorkerParameters;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -23,8 +30,23 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -43,11 +65,15 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.CAMERA,
 
     };
+    String FCM_MESSAGE_URL = "https://fcm.googleapis.com/fcm/send";
+    String SERVER_KEY = "AAAArkeYuGw:APA91bFUiPeytevc24oskyOiPiFqLT1zVoBHCVmFayiiB1Xr1Jzy11Kn13ATCpGIA4zHmyXMwHHWM6ciJBnOHz3QbzFmHq5AtK-a8R4-pWpy0LbDcRd3sgUx45i__PVh_4kFkOXeRV4q";
+    double init_lat=0,init_lng=0;
     ValueCallback<Uri> filePathCallbackNormal;
     ValueCallback<Uri[]> filePathCallbackLollipop;
     Uri mCapturedImageURI;
     private LocationManager locationManager;
     private Location location;
+    String token = "";
     int flg_refresh =1;
     private final int MY_PERMISSIONS_REQUEST_CAMERA=1001;
     IntentIntegrator integrator;
@@ -160,10 +186,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     @SuppressLint("MissingPermission")
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
@@ -174,6 +199,36 @@ public class MainActivity extends AppCompatActivity {
             locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         }
+
+        init_lat = getlat();
+        init_lng = getlng();
+
+       Data data = new Data.Builder()
+                .putString("lat", String.valueOf(init_lat))
+                .putString("lng", String.valueOf(init_lng))
+                .build();
+
+
+        OneTimeWorkRequest uploadWorkRequest = new OneTimeWorkRequest.Builder(UploadWorker.class)
+                .setInitialDelay(1, TimeUnit.MINUTES)
+               .setInputData(data)
+                .build();
+        WorkManager.getInstance().enqueue(uploadWorkRequest);
+
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w("D", "getInstanceId failed", task.getException());
+                            return;
+                        }
+                        // Get new Instance ID token
+                        token = task.getResult().getToken();
+                    }
+                });
+
+
 
         webView.setWebChromeClient(new ChromeManager(this,this));
         webView.setWebViewClient(new ViewManager(this, this));
@@ -187,7 +242,6 @@ public class MainActivity extends AppCompatActivity {
         settings.setDomStorageEnabled(true);//HTML5에서 DOM 사용여부
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);//캐시 사용모드 LOAD_NO_CACHE는 캐시를 사용않는다는 뜻
         settings.setTextZoom(100);       // 폰트크기 고정
-        ///settings.setUserAgentString(settings.getUserAgentString()+"//Brunei");
         webView.setWebContentsDebuggingEnabled(true);
         webView.setLongClickable(true);
         webView.loadUrl(getString(R.string.home));
@@ -216,7 +270,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
     }
 
     @Override
@@ -267,5 +320,4 @@ public class MainActivity extends AppCompatActivity {
     public void show_scaanner(){
        new IntentIntegrator(this).initiateScan();
     }
-
 }
