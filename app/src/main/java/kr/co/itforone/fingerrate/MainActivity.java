@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.refreshlayout)    SwipeRefreshLayout refreshlayout;
     private long backPrssedTime = 0;
     static final int PERMISSION_REQUEST_CODE = 1;
+
     final int FILECHOOSER_NORMAL_REQ_CODE = 1200, FILECHOOSER_LOLLIPOP_REQ_CODE = 1300;
     String[] PERMISSIONS = {
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -65,8 +66,7 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.CAMERA,
 
     };
-    String FCM_MESSAGE_URL = "https://fcm.googleapis.com/fcm/send";
-    String SERVER_KEY = "AAAArkeYuGw:APA91bFUiPeytevc24oskyOiPiFqLT1zVoBHCVmFayiiB1Xr1Jzy11Kn13ATCpGIA4zHmyXMwHHWM6ciJBnOHz3QbzFmHq5AtK-a8R4-pWpy0LbDcRd3sgUx45i__PVh_4kFkOXeRV4q";
+
     double init_lat=0,init_lng=0;
     ValueCallback<Uri> filePathCallbackNormal;
     ValueCallback<Uri[]> filePathCallbackLollipop;
@@ -115,14 +115,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     public void set_filePathCallbackLollipop(ValueCallback<Uri[]> filePathCallbackLollipop){
         this.filePathCallbackLollipop = filePathCallbackLollipop;
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == RESULT_OK) {
             if (requestCode == FILECHOOSER_NORMAL_REQ_CODE) {
@@ -148,14 +146,13 @@ public class MainActivity extends AppCompatActivity {
                         }
                     } else {
 
-                        if(data==null) {
-                            Toast.makeText(getApplicationContext(), mCapturedImageURI.toString(), Toast.LENGTH_LONG).show();
-                            result = new Uri[]{mCapturedImageURI};
-                        }
-                        else{
-                            //Toast.makeText(getApplicationContext(), "data is not null", Toast.LENGTH_LONG).show();
-                            result = WebChromeClient.FileChooserParams.parseResult(resultCode, data);
-                        }
+                            data = new Intent();
+                            data.setData(mCapturedImageURI);
+
+                            filePathCallbackLollipop.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
+                            filePathCallbackLollipop = null;
+                            return;
+
                     }
 
                     filePathCallbackLollipop.onReceiveValue(result);
@@ -184,36 +181,35 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
+
+        super.onActivityResult(requestCode, resultCode, data);
+
     }
 
     @SuppressLint("MissingPermission")
     @Override
-    protected void onCreate(Bundle savedInstanceState){
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
         ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_REQUEST_CODE);
 
-        if(hasPermissions(PERMISSIONS)) {
+        if (hasPermissions(PERMISSIONS)) {
             locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         }
 
+        Intent push = getIntent();
+        String pushurl = "";
+
+        if (push.getStringExtra("goUrl") != null)
+            pushurl = push.getStringExtra("goUrl");
+
+        //Toast.makeText(getApplicationContext(),pushurl,Toast.LENGTH_LONG).show();
+
         init_lat = getlat();
         init_lng = getlng();
-
-       Data data = new Data.Builder()
-                .putString("lat", String.valueOf(init_lat))
-                .putString("lng", String.valueOf(init_lng))
-                .build();
-
-
-        OneTimeWorkRequest uploadWorkRequest = new OneTimeWorkRequest.Builder(UploadWorker.class)
-                .setInitialDelay(1, TimeUnit.MINUTES)
-               .setInputData(data)
-                .build();
-        WorkManager.getInstance().enqueue(uploadWorkRequest);
 
         FirebaseInstanceId.getInstance().getInstanceId()
                 .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
@@ -225,14 +221,24 @@ public class MainActivity extends AppCompatActivity {
                         }
                         // Get new Instance ID token
                         token = task.getResult().getToken();
+
+                        Data data = new Data.Builder()
+                                .putString("lat", String.valueOf(init_lat))
+                                .putString("lng", String.valueOf(init_lng))
+                                .putString("token", token)
+                                .build();
+
+                        OneTimeWorkRequest uploadWorkRequest = new OneTimeWorkRequest.Builder(UploadWorker.class)
+                                .setInitialDelay(1, TimeUnit.MINUTES)
+                                .setInputData(data)
+                                .build();
+                        WorkManager.getInstance().enqueue(uploadWorkRequest);
                     }
                 });
 
-
-
-        webView.setWebChromeClient(new ChromeManager(this,this));
+        webView.setWebChromeClient(new ChromeManager(this, this));
         webView.setWebViewClient(new ViewManager(this, this));
-        webView.addJavascriptInterface(new WebviewJavainterface(this, this),"Android");
+        webView.addJavascriptInterface(new WebviewJavainterface(this, this), "Android");
         WebSettings settings = webView.getSettings();
 
         settings.setJavaScriptEnabled(true);
@@ -244,7 +250,11 @@ public class MainActivity extends AppCompatActivity {
         settings.setTextZoom(100);       // 폰트크기 고정
         webView.setWebContentsDebuggingEnabled(true);
         webView.setLongClickable(true);
+        if (!pushurl.isEmpty()) {
+            webView.loadUrl(pushurl);
+        } else{
         webView.loadUrl(getString(R.string.home));
+        }
 
         refreshlayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
 

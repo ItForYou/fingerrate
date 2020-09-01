@@ -5,14 +5,19 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Message;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.webkit.JsResult;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
+import android.widget.Toast;
+
+import androidx.core.content.FileProvider;
 
 import java.io.File;
 
@@ -72,40 +77,51 @@ class ChromeManager extends WebChromeClient {
         return true;
     }
 
+
     // For Android 5.0+
-    public boolean onShowFileChooser(
-            WebView webView, ValueCallback<Uri[]> filePathCallback,
-            FileChooserParams fileChooserParams) {
+    public boolean onShowFileChooser(  WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
 
         mainActivity.filePathCallbackLollipop = filePathCallback;
 
         // 파일 선택
         // Create AndroidExampleFolder at sdcard
-        File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "fingerrate");
+        File imageStorageDir = new File(Environment.getExternalStorageDirectory()+"/Pictures", "fingerrate");
         if (!imageStorageDir.exists()) {
             // Create AndroidExampleFolder at sdcard
             imageStorageDir.mkdirs();
         }
         // Create camera captured image file path and name
-        File file = new File(imageStorageDir + File.separator + "IMG_" + String.valueOf(System.currentTimeMillis()) + ".png");
-        mainActivity.mCapturedImageURI = Uri.fromFile(file);
+
+        Toast.makeText(mainActivity.getApplicationContext(),imageStorageDir.toString(),Toast.LENGTH_LONG).show();
+        File file = new File(imageStorageDir, "IMG_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+
+        Toast.makeText(mainActivity.getApplicationContext(),file.getPath(),Toast.LENGTH_LONG).show();
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+        {// API 24 이상 일경우..
+            Uri providerURI = FileProvider.getUriForFile( mainActivity , mainActivity.getPackageName()+".provider" , file);
+            mainActivity.mCapturedImageURI = providerURI;
+        }
+        else
+        {// API 24 미만 일경우..
+            mainActivity.mCapturedImageURI = Uri.fromFile(file);
+        }
 
         Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mainActivity.mCapturedImageURI);
 
+
+        // 기본 선택 (카메라, 앨범)
+        Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+        i.addCategory(Intent.CATEGORY_OPENABLE);
+        i.setType("image/*");
+        i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        // Create file chooser intent
+        Intent chooserIntent = Intent.createChooser(i, "Image Chooser");
+        // Set camera intent to file chooser
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Parcelable[]{captureIntent});
 /*
-                // 기본 선택 (카메라, 앨범)
-                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
-                i.addCategory(Intent.CATEGORY_OPENABLE);
-                i.setType("image/*");
-                i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                // Create file chooser intent
-                Intent chooserIntent = Intent.createChooser(i, "Image Chooser");
-                // Set camera intent to file chooser
-                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Parcelable[]{captureIntent});*/
 
-
-              /*  // 갤러리 앨범 선택
+                // 갤러리 앨범 선택
                 Intent i = new Intent(Intent.ACTION_PICK);
                 i.setType("image/*");
                 i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
@@ -115,16 +131,18 @@ class ChromeManager extends WebChromeClient {
                 Intent chooserIntent = Intent.createChooser(i, "Image Chooser");*/
 
 
+/*
         // 다중선택
         Intent i = new Intent();
         i.setType("image/*");
         i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         i.setAction(Intent.ACTION_GET_CONTENT);
         // Create file chooser intent
-        Intent chooserIntent = Intent.createChooser(i, "Image Chooser");
+        Intent chooserIntent = Intent.createChooser(i, "Image Chooser");*/
 
         // On select image call onActivityResult method of activity
         mainActivity.startActivityForResult(chooserIntent, FILECHOOSER_LOLLIPOP_REQ_CODE);
+
 
         return true;
     }
