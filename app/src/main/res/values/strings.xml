@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">FingeRate</string>
     <string name="home">http://14.48.175.176/~fingerrate/</string>
+    <string name="register">http://14.48.175.176/~fingerrate/bbs/register_form.php?certify_id=</string>
     <string name="map">http://14.48.175.176/~fingerrate/bbs/search_tes.php?</string>
 </resources>

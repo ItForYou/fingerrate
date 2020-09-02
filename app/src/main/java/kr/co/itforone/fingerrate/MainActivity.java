@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.work.Data;
 import androidx.work.ListenableWorker;
@@ -30,9 +31,19 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -41,6 +52,7 @@ import com.google.zxing.integration.android.IntentResult;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -56,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.refreshlayout)    SwipeRefreshLayout refreshlayout;
     private long backPrssedTime = 0;
     static final int PERMISSION_REQUEST_CODE = 1;
-
+    private static final int RC_SIGN_IN = 9001;
     final int FILECHOOSER_NORMAL_REQ_CODE = 1200, FILECHOOSER_LOLLIPOP_REQ_CODE = 1300;
     String[] PERMISSIONS = {
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -70,11 +82,13 @@ public class MainActivity extends AppCompatActivity {
     double init_lat=0,init_lng=0;
     ValueCallback<Uri> filePathCallbackNormal;
     ValueCallback<Uri[]> filePathCallbackLollipop;
-    Uri mCapturedImageURI;
+    Uri mCapturedImageURI,mCapturedImageURI2;
     private LocationManager locationManager;
     private Location location;
     String token = "";
     int flg_refresh =1;
+    public GoogleSignInClient mGoogleSignInClient;
+    private FirebaseAuth mAuth;
     private final int MY_PERMISSIONS_REQUEST_CAMERA=1001;
     IntentIntegrator integrator;
     private boolean hasPermissions(String[] permissions) {
@@ -123,52 +137,71 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (resultCode == RESULT_OK) {
-            if (requestCode == FILECHOOSER_NORMAL_REQ_CODE) {
-                if (filePathCallbackNormal == null) return;
-                Uri result = (data == null || resultCode != RESULT_OK) ? null : data.getData();
-                Toast.makeText(getApplicationContext(), data.getData().toString(), Toast.LENGTH_LONG).show();
-                filePathCallbackNormal.onReceiveValue(result);
-                filePathCallbackNormal = null;
 
-            } else if (requestCode == FILECHOOSER_LOLLIPOP_REQ_CODE) {
+            switch (requestCode){
+                 case FILECHOOSER_NORMAL_REQ_CODE: {
+                     if (filePathCallbackNormal == null) return;
+                     Uri result = (data == null || resultCode != RESULT_OK) ? null : data.getData();
+                     Toast.makeText(getApplicationContext(), data.getData().toString(), Toast.LENGTH_LONG).show();
+                     filePathCallbackNormal.onReceiveValue(result);
+                     filePathCallbackNormal = null;
+                     break;
+                 }
+                case FILECHOOSER_LOLLIPOP_REQ_CODE: {
+                    Uri[] result = new Uri[0];
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        // 이미지 다중선택 추가
+                        if (data!=null && data.getClipData() != null) {
+                            int cnt = data.getClipData().getItemCount();
 
-                Uri[] result;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            result = new Uri[cnt];
+                            for (int i = 0; i < cnt; i++) {
+                                result[i] = data.getClipData().getItemAt(i).getUri();
 
-                    // 이미지 다중선택 추가
-                    if (data!=null && data.getClipData() != null) {
-                        int cnt = data.getClipData().getItemCount();
+                            }
+                        } else {
 
-                        result = new Uri[cnt];
-                        for (int i = 0; i < cnt; i++) {
-                            result[i] = data.getClipData().getItemAt(i).getUri();
-
-                        }
-                    } else {
-
-                            data = new Intent();
-                            data.setData(mCapturedImageURI);
+                            if (data == null)
+                                data = new Intent();
+                            if (data.getData() == null)
+                                data.setData(mCapturedImageURI);
 
                             filePathCallbackLollipop.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
                             filePathCallbackLollipop = null;
                             return;
-
+                        }
+                        filePathCallbackLollipop.onReceiveValue(result);
+                        filePathCallbackLollipop = null;
                     }
-
-                    filePathCallbackLollipop.onReceiveValue(result);
-                    filePathCallbackLollipop = null;
+                    break;
                 }
-            }
-            else if(requestCode  == IntentIntegrator.REQUEST_CODE){
-                IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+                case IntentIntegrator.REQUEST_CODE:{
+                    IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
 
-                if (result == null) {
-                    Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
-                } else {
+                    if (result == null) {
+                        Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+                    } else {
                         webView.loadUrl(result.getContents().toString());
+                    }
+                    break;
                 }
-            } else {
-                super.onActivityResult(requestCode, resultCode, data);
+                case RC_SIGN_IN:{
+                    Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+                    try {
+                        // Google Sign In was successful, authenticate with Firebase
+                        GoogleSignInAccount account = task.getResult(ApiException.class);
+                        Log.d("google_login", "firebaseAuthWithGoogle:" + account.getEmail());
+                        webView.loadUrl(getString(R.string.register)+account.getEmail());
+                        firebaseAuthWithGoogle(account.getIdToken());
+                    } catch (ApiException e) {
+                        // Google Sign In failed, update UI appropriately
+                        Log.w("google_login", "Google sign in failed", e);
+                        // [START_EXCLUDE]
+                        // [END_EXCLUDE]
+                    }
+                    break;
+                }
+                default:  break;
             }
         } else {
             try {
@@ -181,9 +214,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
-
         super.onActivityResult(requestCode, resultCode, data);
-
     }
 
     @SuppressLint("MissingPermission")
@@ -239,9 +270,12 @@ public class MainActivity extends AppCompatActivity {
         webView.setWebChromeClient(new ChromeManager(this, this));
         webView.setWebViewClient(new ViewManager(this, this));
         webView.addJavascriptInterface(new WebviewJavainterface(this, this), "Android");
+
         WebSettings settings = webView.getSettings();
 
         settings.setJavaScriptEnabled(true);
+        settings.setJavaScriptCanOpenWindowsAutomatically(true);
+        settings.setSupportMultipleWindows(true);
         settings.setAllowFileAccess(true);//웹에서 파일 접근 여부
         settings.setAppCacheEnabled(true);//캐쉬 사용여부
         settings.setDatabaseEnabled(true);//HTML5에서 db 사용여부 -> indexDB
@@ -280,6 +314,43 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+//구글로그인
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+    }
+//파이어베이스 동기화
+    private void firebaseAuthWithGoogle(String idToken) {
+        // [START_EXCLUDE silent]
+
+        // [END_EXCLUDE]
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d("fireabaseAuth : ", "signInWithCredential:success");
+                            //FirebaseUser user = mAuth.getCurrentUser();
+
+
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w("fireabaseAuth : ", "signInWithCredential:failure", task.getException());
+                            //Snackbar.make(mBinding.mainLayout, "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
+
+                        }
+
+                        // [START_EXCLUDE]
+
+                        // [END_EXCLUDE]
+                    }
+                });
     }
 
     @Override
@@ -303,6 +374,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Firebase sign out
+        mAuth.signOut();
+
+        // Google sign out
+        mGoogleSignInClient.signOut().addOnCompleteListener(this,
+                new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                    }
+                });
+    }
 
     public double getlat(){
         //Toast.makeText(getApplicationContext(),""+location.getLatitude() + "//" +location.getLongitude(),Toast.LENGTH_LONG).show();

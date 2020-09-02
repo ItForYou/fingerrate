@@ -10,6 +10,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import java.net.URISyntaxException;
 
 class ViewManager extends WebViewClient {
 
@@ -21,14 +22,38 @@ class ViewManager extends WebViewClient {
         this.context = activity;
     }
 
-
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
         //   Toast.makeText(mainActivity.getApplicationContext(),"test-"+url, Toast.LENGTH_LONG).show();
 
+
         //로그인, 글쓰기, 회원가입, 정보수정 뒤로가기 처리
             //Toast.makeText(mainActivity.getApplicationContext(),"view"+String.valueOf(mainActivity.flg_alert), Toast.LENGTH_LONG).show();
-            if(url.contains("search_tes.php")){
+
+           if(url.contains("intent")){
+               try {
+                   Intent intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+
+                   if (intent.resolveActivity(mainActivity.getPackageManager()) != null) {
+                       mainActivity.startActivity(intent);
+                       //Log.d(TAG, "ACTIVITY: ${intent.`package`}");
+                       return true;
+                   }
+
+                   // Fallback URL이 있으면 현재 웹뷰에 로딩
+                   String fallbackUrl = intent.getStringExtra("browser_fallback_url");
+                   if (fallbackUrl != null) {
+                       view.loadUrl(fallbackUrl);
+                       //Log.d(TAG, "FALLBACK: $fallbackUrl");
+                       return true;
+                   }
+
+               } catch (URISyntaxException e) {
+                   e.printStackTrace();
+               }
+
+           }
+           else if(url.contains("search_tes.php")){
                 mainActivity.Norefresh();
                 mainActivity.flg_refresh=0;
             }
@@ -50,7 +75,7 @@ class ViewManager extends WebViewClient {
     @Override
     public void onPageFinished(WebView view, String url) {
         super.onPageFinished(view, url);
-        // view.loadUrl("javascript:setToken('"+mainActivity.token+"')");
+         view.loadUrl("javascript:setToken('"+mainActivity.token+"')");
     }
 
 }

@@ -9,7 +9,7 @@ import android.widget.Toast;
 class WebviewJavainterface {
     Activity activity;
     MainActivity mainActivity;
-
+    private static final int RC_SIGN_IN = 9001;
     public WebviewJavainterface(Activity activity, MainActivity mainActivity) {
         this.activity = activity;
         this.mainActivity = mainActivity;
@@ -38,6 +38,26 @@ class WebviewJavainterface {
     public void Show_scan(){
         //Toast.makeText(mainActivity.getApplicationContext(),"show_scan",Toast.LENGTH_LONG).show();
         mainActivity.show_scaanner();
+    }
+//구글 로그인
+    @JavascriptInterface
+    public void login_google() {
+
+        Intent signInIntent = mainActivity.mGoogleSignInClient.getSignInIntent();
+        mainActivity.startActivityForResult(signInIntent, RC_SIGN_IN);
+
+    }
+    @JavascriptInterface
+    public void sendlink(String mb_id){
+
+/*
+        Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        String text = mainActivity.getString(R.string.register) + mb_id;
+        intent.putExtra(Intent.EXTRA_TEXT, text);
+        Intent chooser = Intent.createChooser(intent, "공유하기");
+        mainActivity.startActivity(chooser);*/
+
     }
 
     @JavascriptInterface
