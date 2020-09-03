@@ -41,23 +41,30 @@ class WebviewJavainterface {
     }
 //구글 로그인
     @JavascriptInterface
-    public void login_google() {
+    public void login_google(int mb_no) {
 
         Intent signInIntent = mainActivity.mGoogleSignInClient.getSignInIntent();
+        mainActivity.input_mbno = mb_no;
+      //  Toast.makeText(mainActivity.getApplicationContext(),String.valueOf(mb_no),Toast.LENGTH_LONG).show();
         mainActivity.startActivityForResult(signInIntent, RC_SIGN_IN);
 
     }
     @JavascriptInterface
-    public void sendlink(String mb_id){
+    public void sendlink(String mb_no){
 
-/*
+
         Intent intent = new Intent(android.content.Intent.ACTION_SEND);
         intent.setType("text/plain");
-        String text = mainActivity.getString(R.string.register) + mb_id;
+        String text = mainActivity.getString(R.string.share) + mb_no;
         intent.putExtra(Intent.EXTRA_TEXT, text);
         Intent chooser = Intent.createChooser(intent, "공유하기");
-        mainActivity.startActivity(chooser);*/
+        mainActivity.startActivity(chooser);
 
+    }
+    @JavascriptInterface
+    public void pressback(){
+        Toast.makeText(mainActivity.getApplicationContext(),"pressback",Toast.LENGTH_LONG).show();
+        mainActivity.onBackPressed();
     }
 
     @JavascriptInterface

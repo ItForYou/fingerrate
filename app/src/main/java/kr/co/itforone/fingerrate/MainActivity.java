@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.ViewTreeObserver;
 import android.webkit.ValueCallback;
+import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -89,6 +90,8 @@ public class MainActivity extends AppCompatActivity {
     int flg_refresh =1;
     public GoogleSignInClient mGoogleSignInClient;
     private FirebaseAuth mAuth;
+    String mb_no;
+    int input_mbno=0;
     private final int MY_PERMISSIONS_REQUEST_CAMERA=1001;
     IntentIntegrator integrator;
     private boolean hasPermissions(String[] permissions) {
@@ -191,7 +194,16 @@ public class MainActivity extends AppCompatActivity {
                         // Google Sign In was successful, authenticate with Firebase
                         GoogleSignInAccount account = task.getResult(ApiException.class);
                         Log.d("google_login", "firebaseAuthWithGoogle:" + account.getEmail());
-                        webView.loadUrl(getString(R.string.register)+account.getEmail());
+
+                        if(input_mbno>0) {
+                            webView.loadUrl(getString(R.string.register) + account.getEmail() + "&mb_1=" + String.valueOf(input_mbno));
+                           // Toast.makeText(this,getString(R.string.register) + account.getEmail() + "&mb_1=" + String.valueOf(input_mbno) , Toast.LENGTH_LONG).show();
+                        }
+                        else {
+                            webView.loadUrl(getString(R.string.register) + account.getEmail());
+                           // Toast.makeText(this, getString(R.string.register) + account.getEmail(), Toast.LENGTH_LONG).show();
+                        }
+
                         firebaseAuthWithGoogle(account.getIdToken());
                     } catch (ApiException e) {
                         // Google Sign In failed, update UI appropriately
@@ -236,6 +248,16 @@ public class MainActivity extends AppCompatActivity {
 
         if (push.getStringExtra("goUrl") != null)
             pushurl = push.getStringExtra("goUrl");
+        else{
+            Uri data = push.getData();
+            if(data!=null) {
+               mb_no = data.getQueryParameter("mb_1");
+
+                Log.d("scheme", String.valueOf(mb_no));
+            }
+        }
+
+
 
         //Toast.makeText(getApplicationContext(),pushurl,Toast.LENGTH_LONG).show();
 
@@ -286,7 +308,10 @@ public class MainActivity extends AppCompatActivity {
         webView.setLongClickable(true);
         if (!pushurl.isEmpty()) {
             webView.loadUrl(pushurl);
-        } else{
+        }else if(mb_no!=null && !mb_no.isEmpty()){
+            webView.loadUrl(getString(R.string.register_rcmm)+mb_no);
+        }
+        else{
         webView.loadUrl(getString(R.string.home));
         }
 
@@ -355,12 +380,30 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+      //  Toast.makeText(getApplicationContext(),"back!",Toast.LENGTH_LONG).show();
+        WebBackForwardList list = null;
+        String backurl ="";
+
+        try{
+            list = webView.copyBackForwardList();
+            if(list.getSize() >1 ){
+                backurl = list.getItemAtIndex(list.getCurrentIndex() - 1).getUrl();
+                // Toast.makeText(getApplicationContext(),backurl,Toast.LENGTH_LONG).show();
+
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+
         long tempTime = System.currentTimeMillis();
         long intervalTime = tempTime - backPrssedTime;
+
         if(webView.getUrl().contains("search_tes.php")){
             Yesrefresh();
         }
+
         if(webView.canGoBack()){
+           // Toast.makeText(getApplicationContext(), "goback", Toast.LENGTH_SHORT).show();
             webView.goBack();
             return;
         }
@@ -372,6 +415,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "한번 더 뒤로가기 누를시 앱이 종료됩니다.", Toast.LENGTH_SHORT).show();
             }
         }
+
     }
 
     @Override

@@ -35,6 +35,7 @@ class ViewManager extends WebViewClient {
                    Intent intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
 
                    if (intent.resolveActivity(mainActivity.getPackageManager()) != null) {
+                     //  Toast.makeText(mainActivity.getApplicationContext(),"startactivity",Toast.LENGTH_LONG).show();
                        mainActivity.startActivity(intent);
                        //Log.d(TAG, "ACTIVITY: ${intent.`package`}");
                        return true;
@@ -43,6 +44,7 @@ class ViewManager extends WebViewClient {
                    // Fallback URL이 있으면 현재 웹뷰에 로딩
                    String fallbackUrl = intent.getStringExtra("browser_fallback_url");
                    if (fallbackUrl != null) {
+                  //     Toast.makeText(mainActivity.getApplicationContext(),"fallback",Toast.LENGTH_LONG).show();
                        view.loadUrl(fallbackUrl);
                        //Log.d(TAG, "FALLBACK: $fallbackUrl");
                        return true;
