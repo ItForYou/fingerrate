@@ -17,6 +17,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -256,10 +257,10 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("scheme", String.valueOf(mb_no));
             }
         }
-
-
-
-        //Toast.makeText(getApplicationContext(),pushurl,Toast.LENGTH_LONG).show();
+        SharedPreferences pref = getSharedPreferences("logininfo", MODE_PRIVATE);
+        String id = pref.getString("id", "");
+        String pwd = pref.getString("pwd", "");
+       // Toast.makeText(getApplicationContext(),id+","+pwd,Toast.LENGTH_LONG).show();
 
         init_lat = getlat();
         init_lng = getlng();
@@ -282,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
                                 .build();
 
                         OneTimeWorkRequest uploadWorkRequest = new OneTimeWorkRequest.Builder(UploadWorker.class)
-                                .setInitialDelay(1, TimeUnit.MINUTES)
+                                .setInitialDelay(15, TimeUnit.MINUTES)
                                 .setInputData(data)
                                 .build();
                         WorkManager.getInstance().enqueue(uploadWorkRequest);
@@ -306,13 +307,17 @@ public class MainActivity extends AppCompatActivity {
         settings.setTextZoom(100);       // 폰트크기 고정
         webView.setWebContentsDebuggingEnabled(true);
         webView.setLongClickable(true);
+
         if (!pushurl.isEmpty()) {
             webView.loadUrl(pushurl);
         }else if(mb_no!=null && !mb_no.isEmpty()){
             webView.loadUrl(getString(R.string.register_rcmm)+mb_no);
         }
+        else if(!id.isEmpty() && !pwd.isEmpty()){
+            webView.loadUrl(getString(R.string.login)+"mb_email="+id+"&mb_password="+pwd);
+        }
         else{
-        webView.loadUrl(getString(R.string.home));
+        webView.loadUrl(getString(R.string.intro));
         }
 
         refreshlayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -380,7 +385,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-      //  Toast.makeText(getApplicationContext(),"back!",Toast.LENGTH_LONG).show();
+        //Toast.makeText(getApplicationContext(),webView.getUrl(),Toast.LENGTH_LONG).show();
         WebBackForwardList list = null;
         String backurl ="";
 
@@ -401,8 +406,15 @@ public class MainActivity extends AppCompatActivity {
         if(webView.getUrl().contains("search_tes.php")){
             Yesrefresh();
         }
-
-        if(webView.canGoBack()){
+        if((webView.getUrl().contains(getString(R.string.home)+"?lat=") || webView.getUrl().contains(getString(R.string.home2)+"?lat=") || webView.getUrl().equals(getString(R.string.intro))) && !webView.getUrl().contains("#hash-menu")){
+            if (0 <= intervalTime && 2000 >= intervalTime) {
+                finish();
+            } else {
+                backPrssedTime = tempTime;
+                Toast.makeText(getApplicationContext(), "한번 더 뒤로가기 누를시 앱이 종료됩니다.", Toast.LENGTH_SHORT).show();
+            }
+        }
+        else if(webView.canGoBack()){
            // Toast.makeText(getApplicationContext(), "goback", Toast.LENGTH_SHORT).show();
             webView.goBack();
             return;

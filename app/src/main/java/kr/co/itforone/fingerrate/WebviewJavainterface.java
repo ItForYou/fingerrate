@@ -2,6 +2,7 @@ package kr.co.itforone.fingerrate;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
@@ -13,6 +14,24 @@ class WebviewJavainterface {
     public WebviewJavainterface(Activity activity, MainActivity mainActivity) {
         this.activity = activity;
         this.mainActivity = mainActivity;
+    }
+
+    @JavascriptInterface
+    public void setlogout() {
+        //   Toast.makeText(mainActivity.getApplicationContext(),"logout",Toast.LENGTH_LONG).show();
+        SharedPreferences pref = mainActivity.getSharedPreferences("logininfo", mainActivity.MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        editor.commit();
+    }
+
+    @JavascriptInterface
+    public void setLogininfo(String id,String password) {
+        SharedPreferences pref = mainActivity.getSharedPreferences("logininfo", mainActivity.MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("id",id);
+        editor.putString("pwd",password);
+        editor.commit();
     }
 
     @JavascriptInterface

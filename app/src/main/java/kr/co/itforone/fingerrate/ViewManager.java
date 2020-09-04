@@ -24,7 +24,7 @@ class ViewManager extends WebViewClient {
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        //   Toast.makeText(mainActivity.getApplicationContext(),"test-"+url, Toast.LENGTH_LONG).show();
+//           Toast.makeText(mainActivity.getApplicationContext(),"test-"+url, Toast.LENGTH_LONG).show();
 
 
         //로그인, 글쓰기, 회원가입, 정보수정 뒤로가기 처리
@@ -54,6 +54,13 @@ class ViewManager extends WebViewClient {
                    e.printStackTrace();
                }
 
+           }
+           else if(url.equals(mainActivity.getString(R.string.home))|| url.equals(mainActivity.getString(R.string.home2))){
+
+               double lat = mainActivity.getlat(), lng = mainActivity.getlng();
+               url = url+"?lat="+lat+"&lng="+lng;
+               view.loadUrl(url);
+               return true;
            }
            else if(url.contains("search_tes.php")){
                 mainActivity.Norefresh();
