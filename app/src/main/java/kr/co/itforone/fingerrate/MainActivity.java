@@ -200,13 +200,14 @@ public class MainActivity extends AppCompatActivity {
                             webView.loadUrl(getString(R.string.register) + account.getEmail() + "&mb_1=" + String.valueOf(input_mbno));
                            // Toast.makeText(this,getString(R.string.register) + account.getEmail() + "&mb_1=" + String.valueOf(input_mbno) , Toast.LENGTH_LONG).show();
                         }
-                        else {
+
+                        else{
                             webView.loadUrl(getString(R.string.register) + account.getEmail());
                            // Toast.makeText(this, getString(R.string.register) + account.getEmail(), Toast.LENGTH_LONG).show();
                         }
 
                         firebaseAuthWithGoogle(account.getIdToken());
-                    } catch (ApiException e) {
+                    }catch (ApiException e) {
                         // Google Sign In failed, update UI appropriately
                         Log.w("google_login", "Google sign in failed", e);
                         // [START_EXCLUDE]
@@ -260,7 +261,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences pref = getSharedPreferences("logininfo", MODE_PRIVATE);
         String id = pref.getString("id", "");
         String pwd = pref.getString("pwd", "");
-       // Toast.makeText(getApplicationContext(),id+","+pwd,Toast.LENGTH_LONG).show();
+      //  Toast.makeText(getApplicationContext(),id+","+pwd,Toast.LENGTH_LONG).show();
 
         init_lat = getlat();
         init_lng = getlng();
@@ -314,6 +315,7 @@ public class MainActivity extends AppCompatActivity {
             webView.loadUrl(getString(R.string.register_rcmm)+mb_no);
         }
         else if(!id.isEmpty() && !pwd.isEmpty()){
+            //Toast.makeText(getApplicationContext(),id +","+pwd, Toast.LENGTH_LONG).show();
             webView.loadUrl(getString(R.string.login)+"mb_email="+id+"&mb_password="+pwd);
         }
         else{
@@ -420,14 +422,13 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         else {
-            if (0 <= intervalTime && 2000 >= intervalTime) {
+            if (0 <= intervalTime && 2000 >= intervalTime){
                 finish();
             } else {
                 backPrssedTime = tempTime;
                 Toast.makeText(getApplicationContext(), "한번 더 뒤로가기 누를시 앱이 종료됩니다.", Toast.LENGTH_SHORT).show();
             }
         }
-
     }
 
     @Override

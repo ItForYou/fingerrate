@@ -35,6 +35,38 @@ class WebviewJavainterface {
     }
 
     @JavascriptInterface
+    public void suc_reg(String id, String pwd) {
+
+        SharedPreferences pref = mainActivity.getSharedPreferences("logininfo", mainActivity.MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("id",id);
+        editor.putString("pwd",pwd);
+        editor.commit();
+
+        mainActivity.webView.post(new Runnable() {
+            @Override
+            public void run() {
+
+                mainActivity.webView.loadUrl(mainActivity.getString(R.string.login)+"mb_email="+id+"&mb_password="+pwd);
+
+            }
+        });
+
+
+    }
+
+
+    @JavascriptInterface
+    public void setpwd(String password) {
+
+        SharedPreferences pref = mainActivity.getSharedPreferences("logininfo", mainActivity.MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("pwd",password);
+        editor.apply();
+
+    }
+
+    @JavascriptInterface
     public void getlocation() {
 
         double lat = mainActivity.getlat() * 1000000;
@@ -43,10 +75,13 @@ class WebviewJavainterface {
         lng = Math.ceil(lng) / 1000000;
         double finalLat = lat;
         double finalLng = lng;
+
         mainActivity.webView.post(new Runnable() {
             @Override
             public void run() {
+
                     mainActivity.webView.loadUrl("javascript:move_now('" + finalLat + "','" + finalLng + "');");
+
             }
         });
         //Toast.makeText(mainActivity.getApplicationContext(),""+lat+" , "+lng, Toast.LENGTH_LONG).show();
@@ -55,8 +90,10 @@ class WebviewJavainterface {
     }
     @JavascriptInterface
     public void Show_scan(){
+
         //Toast.makeText(mainActivity.getApplicationContext(),"show_scan",Toast.LENGTH_LONG).show();
         mainActivity.show_scaanner();
+
     }
 //구글 로그인
     @JavascriptInterface
@@ -71,7 +108,6 @@ class WebviewJavainterface {
     @JavascriptInterface
     public void sendlink(String mb_no){
 
-
         Intent intent = new Intent(android.content.Intent.ACTION_SEND);
         intent.setType("text/plain");
         String text = mainActivity.getString(R.string.share) + mb_no;
@@ -82,15 +118,19 @@ class WebviewJavainterface {
     }
     @JavascriptInterface
     public void pressback(){
+
         Toast.makeText(mainActivity.getApplicationContext(),"pressback",Toast.LENGTH_LONG).show();
         mainActivity.onBackPressed();
+
     }
 
     @JavascriptInterface
     public void NoRefresh(){
+
         //Toast.makeText(mainActivity.getApplicationContext(),"Norefresh",Toast.LENGTH_LONG).show();
         mainActivity.Norefresh();
         mainActivity.flg_refresh=0;
+
     }
 
     @JavascriptInterface
