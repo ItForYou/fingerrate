@@ -65,6 +65,11 @@ class ViewManager extends WebViewClient {
            else if(url.contains("search_tes.php")){
                 mainActivity.Norefresh();
                 mainActivity.flg_refresh=0;
+
+               url = url+"?now_lat="+mainActivity.getlat()+"&now_lng="+mainActivity.getlng();
+               view.loadUrl(url);
+               return true;
+
             }
             else{
                 mainActivity.Yesrefresh();

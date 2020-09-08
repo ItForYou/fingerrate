@@ -197,12 +197,12 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("google_login", "firebaseAuthWithGoogle:" + account.getEmail());
 
                         if(input_mbno>0) {
-                            webView.loadUrl(getString(R.string.register) + account.getEmail() + "&mb_1=" + String.valueOf(input_mbno));
+                            webView.loadUrl(getString(R.string.register) + account.getEmail() + "&mb_1=" + String.valueOf(input_mbno)+"&google=1");
                            // Toast.makeText(this,getString(R.string.register) + account.getEmail() + "&mb_1=" + String.valueOf(input_mbno) , Toast.LENGTH_LONG).show();
                         }
 
                         else{
-                            webView.loadUrl(getString(R.string.register) + account.getEmail());
+                            webView.loadUrl(getString(R.string.register) + account.getEmail()+"&google=1");
                            // Toast.makeText(this, getString(R.string.register) + account.getEmail(), Toast.LENGTH_LONG).show();
                         }
 
@@ -261,7 +261,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences pref = getSharedPreferences("logininfo", MODE_PRIVATE);
         String id = pref.getString("id", "");
         String pwd = pref.getString("pwd", "");
-      //  Toast.makeText(getApplicationContext(),id+","+pwd,Toast.LENGTH_LONG).show();
+       // Toast.makeText(getApplicationContext(),id+","+pwd,Toast.LENGTH_LONG).show();
 
         init_lat = getlat();
         init_lng = getlng();
@@ -315,11 +315,11 @@ public class MainActivity extends AppCompatActivity {
             webView.loadUrl(getString(R.string.register_rcmm)+mb_no);
         }
         else if(!id.isEmpty() && !pwd.isEmpty()){
-            //Toast.makeText(getApplicationContext(),id +","+pwd, Toast.LENGTH_LONG).show();
-            webView.loadUrl(getString(R.string.login)+"mb_email="+id+"&mb_password="+pwd);
+           // Toast.makeText(getApplicationContext(),getString(R.string.login)+"mb_email="+id.toString()+"&mb_password="+pwd, Toast.LENGTH_LONG).show();
+            webView.loadUrl(getString(R.string.login)+"mb_email="+id.toString()+"&mb_password="+pwd);
         }
         else{
-        webView.loadUrl(getString(R.string.intro));
+           webView.loadUrl(getString(R.string.intro));
         }
 
         refreshlayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {

@@ -34,7 +34,7 @@ class WebviewJavainterface {
         editor.commit();
     }
 
-    @JavascriptInterface
+   /* @JavascriptInterface
     public void suc_reg(String id, String pwd) {
 
         SharedPreferences pref = mainActivity.getSharedPreferences("logininfo", mainActivity.MODE_PRIVATE);
@@ -46,14 +46,13 @@ class WebviewJavainterface {
         mainActivity.webView.post(new Runnable() {
             @Override
             public void run() {
-
+                Toast.makeText(mainActivity.getApplicationContext(),id+','+pwd,Toast.LENGTH_LONG).show();
                 mainActivity.webView.loadUrl(mainActivity.getString(R.string.login)+"mb_email="+id+"&mb_password="+pwd);
 
             }
         });
 
-
-    }
+    }*/
 
 
     @JavascriptInterface
@@ -88,6 +87,7 @@ class WebviewJavainterface {
 
 
     }
+
     @JavascriptInterface
     public void Show_scan(){
 
@@ -95,6 +95,7 @@ class WebviewJavainterface {
         mainActivity.show_scaanner();
 
     }
+
 //구글 로그인
     @JavascriptInterface
     public void login_google(int mb_no) {
@@ -105,6 +106,7 @@ class WebviewJavainterface {
         mainActivity.startActivityForResult(signInIntent, RC_SIGN_IN);
 
     }
+
     @JavascriptInterface
     public void sendlink(String mb_no){
 
@@ -116,6 +118,7 @@ class WebviewJavainterface {
         mainActivity.startActivity(chooser);
 
     }
+
     @JavascriptInterface
     public void pressback(){
 
