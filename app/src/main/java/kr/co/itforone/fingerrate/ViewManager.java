@@ -3,6 +3,7 @@ package kr.co.itforone.fingerrate;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -24,7 +25,7 @@ class ViewManager extends WebViewClient {
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
-//           Toast.makeText(mainActivity.getApplicationContext(),"test-"+url, Toast.LENGTH_LONG).show();
+             //  Toast.makeText(mainActivity.getApplicationContext(),"test-"+url, Toast.LENGTH_LONG).show();
 
 
         //로그인, 글쓰기, 회원가입, 정보수정 뒤로가기 처리
@@ -49,11 +50,18 @@ class ViewManager extends WebViewClient {
                        //Log.d(TAG, "FALLBACK: $fallbackUrl");
                        return true;
                    }
-
-               } catch (URISyntaxException e) {
+               }catch (URISyntaxException e) {
                    e.printStackTrace();
                }
 
+           }
+           else if(url.contains("play.google.com/store")){
+               Intent intent = new Intent(Intent.ACTION_VIEW);
+               intent.setData(Uri.parse(
+                       "https://play.google.com/store/apps/details?id=kr.co.itforone.fingerrate"));
+               intent.setPackage("com.android.vending");
+               mainActivity.startActivity(intent);
+               return true;
            }
            else if(url.equals(mainActivity.getString(R.string.home))|| url.equals(mainActivity.getString(R.string.home2))){
 

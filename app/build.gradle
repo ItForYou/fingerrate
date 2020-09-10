@@ -10,8 +10,8 @@ android {
         applicationId "kr.co.itforone.fingerrate"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 8
-        versionName "1.7"
+        versionCode 10
+        versionName "1.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -43,7 +43,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
     implementation 'com.jakewharton:butterknife:10.1.0'
-
+    implementation 'org.jsoup:jsoup:1.13.1'
     // (Java only)
     implementation "androidx.work:work-runtime:$work_version"
     implementation "androidx.work:work-gcm:$work_version"

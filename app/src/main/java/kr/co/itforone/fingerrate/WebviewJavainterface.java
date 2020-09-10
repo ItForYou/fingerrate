@@ -27,6 +27,7 @@ class WebviewJavainterface {
 
     @JavascriptInterface
     public void setLogininfo(String id,String password) {
+       // Toast.makeText(mainActivity.getApplicationContext(),"setlogin",Toast.LENGTH_LONG).show();
         SharedPreferences pref = mainActivity.getSharedPreferences("logininfo", mainActivity.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         editor.putString("id",id);
@@ -98,21 +99,31 @@ class WebviewJavainterface {
 
 //구글 로그인
     @JavascriptInterface
-    public void login_google(int mb_no) {
+    public void login_google(int mb_no, String mb_3) {
 
         Intent signInIntent = mainActivity.mGoogleSignInClient.getSignInIntent();
-        mainActivity.input_mbno = mb_no;
+        if(mb_no!=0)
+            mainActivity.input_mbno = mb_no;
+        else
+            mainActivity.input_mbno = 0;
+        if(!mb_3.isEmpty()){
+            mainActivity.input_mb3 = mb_3;
+        }
+        else{
+            mainActivity.input_mb3 = "";
+        }
+
       //  Toast.makeText(mainActivity.getApplicationContext(),String.valueOf(mb_no),Toast.LENGTH_LONG).show();
         mainActivity.startActivityForResult(signInIntent, RC_SIGN_IN);
 
     }
 
     @JavascriptInterface
-    public void sendlink(String mb_no){
+    public void sendlink(String mb_no, String mb_2){
 
         Intent intent = new Intent(android.content.Intent.ACTION_SEND);
         intent.setType("text/plain");
-        String text = mainActivity.getString(R.string.share) + mb_no;
+        String text = mainActivity.getString(R.string.share) + mb_no + "&mb_3=" + mb_2;
         intent.putExtra(Intent.EXTRA_TEXT, text);
         Intent chooser = Intent.createChooser(intent, "공유하기");
         mainActivity.startActivity(chooser);
@@ -122,7 +133,7 @@ class WebviewJavainterface {
     @JavascriptInterface
     public void pressback(){
 
-        Toast.makeText(mainActivity.getApplicationContext(),"pressback",Toast.LENGTH_LONG).show();
+       /// Toast.makeText(mainActivity.getApplicationContext(),"pressback",Toast.LENGTH_LONG).show();
         mainActivity.onBackPressed();
 
     }
@@ -138,8 +149,10 @@ class WebviewJavainterface {
 
     @JavascriptInterface
     public void YesRefresh(){
+
         mainActivity.Yesrefresh();
         mainActivity.flg_refresh=1;
+
     }
 
 

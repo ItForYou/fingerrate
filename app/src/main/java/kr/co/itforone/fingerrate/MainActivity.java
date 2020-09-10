@@ -4,14 +4,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.documentfile.provider.DocumentFile;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.work.Data;
-import androidx.work.ListenableWorker;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
-import androidx.work.Worker;
-import androidx.work.WorkerParameters;
+
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -40,7 +37,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -51,15 +47,6 @@ import com.google.firebase.iid.InstanceIdResult;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.File;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
@@ -72,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
     static final int PERMISSION_REQUEST_CODE = 1;
     private static final int RC_SIGN_IN = 9001;
     final int FILECHOOSER_NORMAL_REQ_CODE = 1200, FILECHOOSER_LOLLIPOP_REQ_CODE = 1300;
+
     String[] PERMISSIONS = {
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -91,10 +79,13 @@ public class MainActivity extends AppCompatActivity {
     int flg_refresh =1;
     public GoogleSignInClient mGoogleSignInClient;
     private FirebaseAuth mAuth;
-    String mb_no;
+    String mb_no, mb_3;
     int input_mbno=0;
+    String input_mb3 = "";
     private final int MY_PERMISSIONS_REQUEST_CAMERA=1001;
     IntentIntegrator integrator;
+
+
     private boolean hasPermissions(String[] permissions) {
         // 퍼미션 확인
         int result = -1;
@@ -197,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("google_login", "firebaseAuthWithGoogle:" + account.getEmail());
 
                         if(input_mbno>0) {
-                            webView.loadUrl(getString(R.string.register) + account.getEmail() + "&mb_1=" + String.valueOf(input_mbno)+"&google=1");
+                            webView.loadUrl(getString(R.string.register) + account.getEmail() + "&mb_1=" + String.valueOf(input_mbno)+"&mb_3=" +input_mb3+"&google=1");
                            // Toast.makeText(this,getString(R.string.register) + account.getEmail() + "&mb_1=" + String.valueOf(input_mbno) , Toast.LENGTH_LONG).show();
                         }
 
@@ -253,15 +244,21 @@ public class MainActivity extends AppCompatActivity {
         else{
             Uri data = push.getData();
             if(data!=null) {
-               mb_no = data.getQueryParameter("mb_1");
 
-                Log.d("scheme", String.valueOf(mb_no));
+               mb_no = data.getQueryParameter("mb_1");
+               mb_3= data.getQueryParameter("mb_3");
+
+           /*     Log.d("scheme", String.valueOf(mb_no));
+                Log.d("scheme2", String.valueOf(mb_3));*/
             }
         }
+
+
+
         SharedPreferences pref = getSharedPreferences("logininfo", MODE_PRIVATE);
         String id = pref.getString("id", "");
         String pwd = pref.getString("pwd", "");
-       // Toast.makeText(getApplicationContext(),id+","+pwd,Toast.LENGTH_LONG).show();
+        //Toast.makeText(getApplicationContext(),id+","+pwd,Toast.LENGTH_LONG).show();
 
         init_lat = getlat();
         init_lng = getlng();
@@ -312,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
         if (!pushurl.isEmpty()) {
             webView.loadUrl(pushurl);
         }else if(mb_no!=null && !mb_no.isEmpty()){
-            webView.loadUrl(getString(R.string.register_rcmm)+mb_no);
+            webView.loadUrl(getString(R.string.register_rcmm)+mb_no+"&mb_3="+mb_3);
         }
         else if(!id.isEmpty() && !pwd.isEmpty()){
            // Toast.makeText(getApplicationContext(),getString(R.string.login)+"mb_email="+id.toString()+"&mb_password="+pwd, Toast.LENGTH_LONG).show();
@@ -408,6 +405,7 @@ public class MainActivity extends AppCompatActivity {
         if(webView.getUrl().contains("search_tes.php")){
             Yesrefresh();
         }
+
         if((webView.getUrl().contains(getString(R.string.home)+"?lat=") || webView.getUrl().contains(getString(R.string.home2)+"?lat=") || webView.getUrl().equals(getString(R.string.intro))) && !webView.getUrl().contains("#hash-menu")){
             if (0 <= intervalTime && 2000 >= intervalTime) {
                 finish();
