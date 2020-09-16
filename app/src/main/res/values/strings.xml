@@ -5,7 +5,7 @@
     <string name="home2">http://14.48.175.176/~fingerrate/index.php</string>
     <string name="register">http://14.48.175.176/~fingerrate/bbs/register_form.php?certify_id=</string>
     <string name="register_rcmm">http://14.48.175.176/~fingerrate/bbs/register.php?mb_1=</string>
-    <string name="share">http://14.48.175.176/~fingerrate/bbs/go_share.php?mb_1=</string>
+    <string name="share">http://14.48.175.176/~fingerrate/bbs/register.php?flg_rcmm=1</string>
     <string name="login">http://14.48.175.176/~fingerrate/bbs/register_mail_login_check.php?</string>
     <string name="map">http://14.48.175.176/~fingerrate/bbs/search_tes.php?</string>
 </resources>

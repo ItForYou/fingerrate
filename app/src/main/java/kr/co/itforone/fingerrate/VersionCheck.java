@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 
@@ -20,12 +19,13 @@ import java.io.IOException;
 
 class VersionCheck extends AsyncTask<Void,Void,String> {
     String pakage;
-    public String marketVersion;
+    public String marketVersion, pushurl;
     Activity mContext;
     private final int SPLASH_DISPLAY_LENGTH = 1000;
-    public VersionCheck(String pakage,Activity context){
+    public VersionCheck(String pakage,Activity context, String pushurl){
         this.pakage=pakage;
-        mContext=context;
+        this.pushurl = pushurl;
+        this.mContext=context;
     }
 
     @Override
@@ -82,6 +82,8 @@ class VersionCheck extends AsyncTask<Void,Void,String> {
                     public void run() {
                         //    finish();
                         Intent main = new Intent(mContext,MainActivity.class);
+                        if(pushurl!="" && !pushurl.isEmpty())
+                        main.putExtra("goUrl",pushurl);
                         mContext.startActivity(main);
                         mContext.finish();
                         return;

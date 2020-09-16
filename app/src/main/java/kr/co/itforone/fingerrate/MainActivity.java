@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     String mb_no, mb_3;
     int input_mbno=0;
-    String input_mb3 = "";
+    String input_mb3 = "", pushurl = "";;
     private final int MY_PERMISSIONS_REQUEST_CAMERA=1001;
     IntentIntegrator integrator;
 
@@ -237,7 +237,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Intent push = getIntent();
-        String pushurl = "";
 
         if (push.getStringExtra("goUrl") != null)
             pushurl = push.getStringExtra("goUrl");
@@ -253,12 +252,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-
-
         SharedPreferences pref = getSharedPreferences("logininfo", MODE_PRIVATE);
         String id = pref.getString("id", "");
         String pwd = pref.getString("pwd", "");
         //Toast.makeText(getApplicationContext(),id+","+pwd,Toast.LENGTH_LONG).show();
+       // Toast.makeText(getApplicationContext(),pushurl,Toast.LENGTH_LONG).show();
 
         init_lat = getlat();
         init_lng = getlng();
@@ -274,17 +272,20 @@ public class MainActivity extends AppCompatActivity {
                         // Get new Instance ID token
                         token = task.getResult().getToken();
 
-                        Data data = new Data.Builder()
-                                .putString("lat", String.valueOf(init_lat))
-                                .putString("lng", String.valueOf(init_lng))
-                                .putString("token", token)
-                                .build();
+                        if(pushurl=="" || pushurl.isEmpty()) {
+                            Data data = new Data.Builder()
+                                    .putString("lat", String.valueOf(init_lat))
+                                    .putString("lng", String.valueOf(init_lng))
+                                    .putString("token", token)
+                                    .putString("mb_id", id)
+                                    .build();
 
-                        OneTimeWorkRequest uploadWorkRequest = new OneTimeWorkRequest.Builder(UploadWorker.class)
-                                .setInitialDelay(15, TimeUnit.MINUTES)
-                                .setInputData(data)
-                                .build();
-                        WorkManager.getInstance().enqueue(uploadWorkRequest);
+                            OneTimeWorkRequest uploadWorkRequest = new OneTimeWorkRequest.Builder(UploadWorker.class)
+                                    .setInitialDelay(15, TimeUnit.MINUTES)
+                                    .setInputData(data)
+                                    .build();
+                            WorkManager.getInstance().enqueue(uploadWorkRequest);
+                        }
                     }
                 });
 
@@ -306,7 +307,7 @@ public class MainActivity extends AppCompatActivity {
         webView.setWebContentsDebuggingEnabled(true);
         webView.setLongClickable(true);
 
-        if (!pushurl.isEmpty()) {
+        if (!pushurl.isEmpty() && !id.isEmpty() && id!="") {
             webView.loadUrl(pushurl);
         }else if(mb_no!=null && !mb_no.isEmpty()){
             webView.loadUrl(getString(R.string.register_rcmm)+mb_no+"&mb_3="+mb_3);

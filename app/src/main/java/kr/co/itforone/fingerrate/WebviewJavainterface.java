@@ -3,9 +3,7 @@ package kr.co.itforone.fingerrate;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.webkit.JavascriptInterface;
-import android.widget.Toast;
 
 class WebviewJavainterface {
     Activity activity;
@@ -123,7 +121,7 @@ class WebviewJavainterface {
 
         Intent intent = new Intent(android.content.Intent.ACTION_SEND);
         intent.setType("text/plain");
-        String text = mainActivity.getString(R.string.share) + mb_no + "&mb_3=" + mb_2;
+        String text = mainActivity.getString(R.string.share) +"&mb_1="+mb_no + "&mb_3=" + mb_2;
         intent.putExtra(Intent.EXTRA_TEXT, text);
         Intent chooser = Intent.createChooser(intent, "공유하기");
         mainActivity.startActivity(chooser);
