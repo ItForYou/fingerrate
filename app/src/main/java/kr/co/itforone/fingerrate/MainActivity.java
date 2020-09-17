@@ -367,17 +367,12 @@ public class MainActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d("fireabaseAuth : ", "signInWithCredential:success");
                             //FirebaseUser user = mAuth.getCurrentUser();
-
-
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w("fireabaseAuth : ", "signInWithCredential:failure", task.getException());
                             //Snackbar.make(mBinding.mainLayout, "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
-
                         }
-
                         // [START_EXCLUDE]
-
                         // [END_EXCLUDE]
                     }
                 });
@@ -394,7 +389,6 @@ public class MainActivity extends AppCompatActivity {
             if(list.getSize() >1 ){
                 backurl = list.getItemAtIndex(list.getCurrentIndex() - 1).getUrl();
                 // Toast.makeText(getApplicationContext(),backurl,Toast.LENGTH_LONG).show();
-
             }
         } catch (NullPointerException e) {
             e.printStackTrace();
@@ -469,6 +463,8 @@ public class MainActivity extends AppCompatActivity {
         refreshlayout.setEnabled(true);
     }
     public void show_scaanner(){
-       new IntentIntegrator(this).initiateScan();
+       new IntentIntegrator(this)
+               .setBeepEnabled(false)
+               .initiateScan();
     }
 }

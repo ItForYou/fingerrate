@@ -88,6 +88,29 @@ class WebviewJavainterface {
     }
 
     @JavascriptInterface
+    public void getnow() {
+
+        double lat = mainActivity.getlat() * 1000000;
+        double lng = mainActivity.getlng() * 1000000;
+        lat = Math.ceil(lat) / 1000000;
+        lng = Math.ceil(lng) / 1000000;
+        double finalLat = lat;
+        double finalLng = lng;
+
+        mainActivity.webView.post(new Runnable() {
+            @Override
+            public void run() {
+
+                mainActivity.webView.loadUrl("javascript:set_initlocate(" + finalLat + "," + finalLng + ");");
+
+            }
+        });
+        //Toast.makeText(mainActivity.getApplicationContext(),""+lat+" , "+lng, Toast.LENGTH_LONG).show();
+
+
+    }
+
+    @JavascriptInterface
     public void Show_scan(){
 
         //Toast.makeText(mainActivity.getApplicationContext(),"show_scan",Toast.LENGTH_LONG).show();
@@ -135,6 +158,7 @@ class WebviewJavainterface {
         mainActivity.onBackPressed();
 
     }
+/*
 
     @JavascriptInterface
     public void NoRefresh(){
@@ -152,6 +176,7 @@ class WebviewJavainterface {
         mainActivity.flg_refresh=1;
 
     }
+*/
 
 
 }

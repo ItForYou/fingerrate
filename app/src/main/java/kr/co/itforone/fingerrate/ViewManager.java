@@ -24,7 +24,19 @@ class ViewManager extends WebViewClient {
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
 
         //로그인, 글쓰기, 회원가입, 정보수정 뒤로가기 처리
-          //  Toast.makeText(mainActivity.getApplicationContext(),url, Toast.LENGTH_LONG).show();
+        //Toast.makeText(mainActivity.getApplicationContext(),url, Toast.LENGTH_LONG).show();
+
+                if(url.contains("search_tes_view.php") || url.contains("place_view.php") || url.contains("search_tes.php")){
+
+                    mainActivity.Norefresh();
+                    mainActivity.flg_refresh=0;
+
+                }
+
+                else{
+                    mainActivity.Yesrefresh();
+                    mainActivity.flg_refresh=1;
+                }
 
            if(url.contains("intent")){
                try {
@@ -66,18 +78,13 @@ class ViewManager extends WebViewClient {
                return true;
            }
            else if(url.contains("search_tes.php")){
-                mainActivity.Norefresh();
-                mainActivity.flg_refresh=0;
-
                url = url+"?now_lat="+mainActivity.getlat()+"&now_lng="+mainActivity.getlng();
                view.loadUrl(url);
+
                return true;
 
             }
-            else{
-                mainActivity.Yesrefresh();
-                mainActivity.flg_refresh=1;
-            }
+
             view.loadUrl(url);
             return true;
 
