@@ -13,7 +13,5 @@ public class pushActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
 
-
-
     }
 }

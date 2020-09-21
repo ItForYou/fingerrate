@@ -12,6 +12,7 @@ import androidx.work.WorkManager;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,8 +22,12 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.ViewTreeObserver;
+import android.webkit.CookieManager;
+import android.webkit.DownloadListener;
+import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
@@ -319,6 +324,59 @@ public class MainActivity extends AppCompatActivity {
         else{
            webView.loadUrl(getString(R.string.intro));
         }
+
+        webView.setDownloadListener(new DownloadListener() {
+            @Override
+            public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
+                try {
+
+                    //String fileName = URLUtil.guessFileName(url, contentDisposition, mimetype);
+                    //fileName = URLEncoder.encode(fileName, "EUC-KR").replace("+", "%20");
+                    //fileName = URLDecoder.decode(fileName, "UTF-8");
+                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                    request.setMimeType(mimetype);
+                    Log.d("file_error", "step1");
+                    //------------------------COOKIE!!------------------------
+                    String cookies = CookieManager.getInstance().getCookie(url);
+                    Log.d("file_error", "step2");
+                    request.addRequestHeader("cookie", cookies);
+                    //------------------------COOKIE!!------------------------
+                    request.addRequestHeader("User-Agent", userAgent);
+                    request.setDescription("Downloading file...");
+                    request.setTitle(URLUtil.guessFileName(url, contentDisposition, mimetype));
+                    request.allowScanningByMediaScanner();
+                    Log.d("file_error", "step3");
+                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, URLUtil.guessFileName(url, contentDisposition, mimetype));
+                    Log.d("file_error", "step4");
+
+                    DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                    Log.d("file_error", "step5");
+                    dm.enqueue(request);
+                    Log.d("file_error", "step6");
+                    Toast.makeText(getApplicationContext(), "다운로드 시작..", Toast.LENGTH_LONG).show();
+                    Log.d("file_error", "step7");
+                    //Toast.makeText(getApplicationContext(), fileName, Toast.LENGTH_LONG).show();
+
+                } catch (Exception e) {
+                    if (ContextCompat.checkSelfPermission(MainActivity.this,
+                            android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            != PackageManager.PERMISSION_GRANTED) {
+                        // Should we show an explanation?
+                        if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                                android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                            Toast.makeText(getBaseContext(), "첨부파일 다운로드를 위해\n동의가 필요합니다.", Toast.LENGTH_LONG).show();
+                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                    110);
+                        } else {
+                            Toast.makeText(getBaseContext(), "첨부파일 다운로드를 위해\n동의가 필요합니다.", Toast.LENGTH_LONG).show();
+                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                    110);
+                        }
+                    }
+                }
+            }
+        });
 
         refreshlayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
 
