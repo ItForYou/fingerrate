@@ -5,6 +5,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.webkit.JavascriptInterface;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+
 class WebviewJavainterface {
     Activity activity;
     MainActivity mainActivity;
@@ -21,6 +26,12 @@ class WebviewJavainterface {
         SharedPreferences.Editor editor = pref.edit();
         editor.clear();
         editor.commit();
+        mainActivity.mGoogleSignInClient.signOut().addOnCompleteListener(mainActivity,
+                new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                    }
+                });
     }
 
     @JavascriptInterface
@@ -156,6 +167,12 @@ class WebviewJavainterface {
 
        /// Toast.makeText(mainActivity.getApplicationContext(),"pressback",Toast.LENGTH_LONG).show();
         mainActivity.onBackPressed();
+
+    }
+    @JavascriptInterface
+    public void qrurl(String qrurl){
+        /// Toast.makeText(mainActivity.getApplicationContext(),"pressback",Toast.LENGTH_LONG).show();
+        mainActivity.qr_url = qrurl;
 
     }
 /*

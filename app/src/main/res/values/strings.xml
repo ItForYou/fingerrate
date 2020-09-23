@@ -8,4 +8,6 @@
     <string name="share">http://14.48.175.176/~fingerrate/bbs/register.php?flg_rcmm=1</string>
     <string name="login">http://14.48.175.176/~fingerrate/bbs/register_mail_login_check.php?</string>
     <string name="map">http://14.48.175.176/~fingerrate/bbs/search_tes.php?</string>
+    <string name="qrcode">https://chart.apis.google.com/chart?chs</string>
+
 </resources>

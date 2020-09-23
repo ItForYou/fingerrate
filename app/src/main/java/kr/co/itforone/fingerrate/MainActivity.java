@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
@@ -13,16 +14,23 @@ import androidx.work.WorkManager;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.DownloadManager;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.ViewTreeObserver;
 import android.webkit.CookieManager;
@@ -33,6 +41,7 @@ import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -51,7 +60,14 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
@@ -59,11 +75,13 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
     @BindView(R.id.webView)    WebView webView;
+    @BindView(R.id.imgview)    ImageView imgview;
     @BindView(R.id.refreshlayout)    SwipeRefreshLayout refreshlayout;
+  //  @BindView(R.id.cropImageView)    CropImageView cropImageView;
     private long backPrssedTime = 0;
     static final int PERMISSION_REQUEST_CODE = 1;
     private static final int RC_SIGN_IN = 9001;
-    final int FILECHOOSER_NORMAL_REQ_CODE = 1200, FILECHOOSER_LOLLIPOP_REQ_CODE = 1300;
+    final int FILECHOOSER_NORMAL_REQ_CODE = 1200, FILECHOOSER_LOLLIPOP_REQ_CODE = 1300,CROP_FROM_ALBUM=1400;
 
     String[] PERMISSIONS = {
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -77,14 +95,14 @@ public class MainActivity extends AppCompatActivity {
     double init_lat=0,init_lng=0;
     ValueCallback<Uri> filePathCallbackNormal;
     ValueCallback<Uri[]> filePathCallbackLollipop;
-    Uri mCapturedImageURI,mCapturedImageURI2;
+    Uri mCapturedImageURI,croppath,mUri;
     private LocationManager locationManager;
     private Location location;
     String token = "";
     int flg_refresh =1;
     public GoogleSignInClient mGoogleSignInClient;
     private FirebaseAuth mAuth;
-    String mb_no, mb_3;
+    String mb_no, mb_3,qr_url;
     int input_mbno=0;
     String input_mb3 = "", pushurl = "";;
     private final int MY_PERMISSIONS_REQUEST_CAMERA=1001;
@@ -136,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (resultCode == RESULT_OK) {
+        if (resultCode == RESULT_OK){
 
             switch (requestCode){
                  case FILECHOOSER_NORMAL_REQ_CODE: {
@@ -147,6 +165,7 @@ public class MainActivity extends AppCompatActivity {
                      filePathCallbackNormal = null;
                      break;
                  }
+
                 case FILECHOOSER_LOLLIPOP_REQ_CODE: {
                     Uri[] result = new Uri[0];
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -160,15 +179,21 @@ public class MainActivity extends AppCompatActivity {
 
                             }
                         } else {
+                            if(webView.getUrl().contains("mypage.php")){
+                               // Toast.makeText(this, mCapturedImageURI.toString(), Toast.LENGTH_SHORT).show();
 
-                            if (data == null)
-                                data = new Intent();
-                            if (data.getData() == null)
-                                data.setData(mCapturedImageURI);
-
-                            filePathCallbackLollipop.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
-                            filePathCallbackLollipop = null;
-                            return;
+                                //cropImage();
+                            }
+                            else{
+                                if (data == null)
+                                    data = new Intent();
+                                if (data.getData() == null)
+                                    data.setData(mCapturedImageURI);
+                                //Toast.makeText(this,mCapturedImageURI.toString()+"2", Toast.LENGTH_LONG).show();
+                                filePathCallbackLollipop.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
+                                filePathCallbackLollipop = null;
+                                return;
+                            }
                         }
                         filePathCallbackLollipop.onReceiveValue(result);
                         filePathCallbackLollipop = null;
@@ -211,6 +236,17 @@ public class MainActivity extends AppCompatActivity {
                     }
                     break;
                 }
+                case CROP_FROM_ALBUM:
+
+                                if (data == null)
+                                    data = new Intent();
+                                if (data.getData() == null)
+                                    data.setData(mCapturedImageURI);
+
+                                //Toast.makeText(this,String.valueOf(), Toast.LENGTH_LONG).show();
+                                filePathCallbackLollipop.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
+                                filePathCallbackLollipop = null;
+                        break;
                 default:  break;
             }
         } else {
@@ -226,6 +262,94 @@ public class MainActivity extends AppCompatActivity {
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
+
+    public void cropImage(){
+
+
+        Intent intent = new Intent("com.android.camera.action.CROP");
+
+        intent.setDataAndType(mCapturedImageURI , "image/*");
+        intent.putExtra("aspectX", 1);
+        intent.putExtra("aspectY", 1);
+        intent.putExtra("scale", true);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, mCapturedImageURI);
+        /**
+         * getUriforFile()이 return한 content URI에 대한 접근권한을 승인하려면 grantUriPermission을 호출한다.
+         * mode_flags 파라미터의 값에 따라. 지정한 패키지에 대해 content URI를 위한 임시 접근을 승인한다.
+         * 권한은 기기가 리부팅 되거나 revokeUriPermission()을 호출하여 취소할때까지 유지.
+         *
+         */
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        grantUriPermission( getPackageName(), mCapturedImageURI , Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+
+        startActivityForResult(intent, CROP_FROM_ALBUM);
+
+    }
+
+  /*  public void cropImage2() {
+        this.grantUriPermission("com.android.camera", mCapturedImageURI,
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        Intent intent = new Intent("com.android.camera.action.CROP");
+        intent.setDataAndType(mCapturedImageURI, "image/*");
+
+        List<ResolveInfo> list = getPackageManager().queryIntentActivities(intent, 0);
+        grantUriPermission(list.get(0).activityInfo.packageName, mCapturedImageURI,
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        int size = list.size();
+        if (size == 0) {
+            Toast.makeText(this, "취소 되었습니다.", Toast.LENGTH_SHORT).show();
+            return;
+        } else {
+            Toast.makeText(this, "용량이 큰 사진의 경우 시간이 오래 걸릴 수 있습니다.", Toast.LENGTH_SHORT).show();
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            intent.putExtra("crop", "true");
+            intent.putExtra("aspectX", 4);
+            intent.putExtra("aspectY", 3);
+            intent.putExtra("scale", true);
+            File croppedFileName = null;
+
+                File imageStorageDir = new File(getFilesDir() + "/Pictures", "fingerrate");
+                if (!imageStorageDir.exists()) {
+                    // Create AndroidExampleFolder at sdcard
+                    imageStorageDir.mkdirs();
+                }
+                // Create camera captured image file path and name
+
+                //Toast.makeText(mainActivity.getApplicationContext(),imageStorageDir.toString(),Toast.LENGTH_LONG).show();
+            croppedFileName = new File(imageStorageDir, "IMG_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+
+            File tempFile = new File(imageStorageDir.toString(), croppedFileName.getName());
+
+            mCapturedImageURI = FileProvider.getUriForFile(MainActivity.this,
+                    getPackageName() + ".provider", tempFile);
+
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+
+            intent.putExtra("return-data", false);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, mCapturedImageURI);
+            intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString()); //Bitmap 형태로 받기 위해 해당 작업 진행
+
+            Intent i = new Intent(intent);
+            ResolveInfo res = list.get(0);
+            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            i.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            grantUriPermission(res.activityInfo.packageName, mCapturedImageURI,
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            i.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
+            startActivityForResult(i, CROP_FROM_ALBUM);
+
+
+        }
+
+    }*/
+
+
 
     @SuppressLint("MissingPermission")
     @Override
@@ -325,7 +449,7 @@ public class MainActivity extends AppCompatActivity {
            webView.loadUrl(getString(R.string.intro));
         }
 
-        webView.setDownloadListener(new DownloadListener() {
+      /*  webView.setDownloadListener(new DownloadListener() {
             @Override
             public void onDownloadStart(String url, String userAgent, String contentDisposition, String mimetype, long contentLength) {
                 try {
@@ -376,7 +500,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
-        });
+        });*/
 
         refreshlayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
 

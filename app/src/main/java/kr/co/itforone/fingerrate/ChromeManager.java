@@ -15,9 +15,13 @@ import android.webkit.JsResult;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
+import android.widget.Toast;
 
 
 import androidx.core.content.FileProvider;
+
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
 
@@ -82,56 +86,57 @@ class ChromeManager extends WebChromeClient {
     // For Android 5.0+
     public boolean onShowFileChooser(  WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
 
-        mainActivity.filePathCallbackLollipop = filePathCallback;
 
-        // 파일 선택
-        // Create AndroidExampleFolder at sdcard
 
-        //Toast.makeText(mainActivity.getApplicationContext(),file.getPath(),Toast.LENGTH_LONG).show();
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-        {// API 24 이상 일경우..
-            File imageStorageDir = new File(mainActivity.getFilesDir()+"/Pictures", "fingerrate");
-            if (!imageStorageDir.exists()) {
-                // Create AndroidExampleFolder at sdcard
-                imageStorageDir.mkdirs();
+            mainActivity.filePathCallbackLollipop = filePathCallback;
+
+            // 파일 선택
+            // Create AndroidExampleFolder at sdcard
+
+            //Toast.makeText(mainActivity.getApplicationContext(),file.getPath(),Toast.LENGTH_LONG).show();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {// API 24 이상 일경우..
+                File imageStorageDir = new File(mainActivity.getFilesDir() + "/Pictures", "fingerrate");
+                if (!imageStorageDir.exists()) {
+                    // Create AndroidExampleFolder at sdcard
+                    imageStorageDir.mkdirs();
+                }
+                // Create camera captured image file path and name
+
+                //Toast.makeText(mainActivity.getApplicationContext(),imageStorageDir.toString(),Toast.LENGTH_LONG).show();
+                File file = new File(imageStorageDir, "IMG_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+                Uri providerURI = FileProvider.getUriForFile(mainActivity, mainActivity.getPackageName() + ".provider", file);
+                mainActivity.mCapturedImageURI = providerURI;
+
+            } else {// API 24 미만 일경우..
+
+                File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "fingerrate");
+                if (!imageStorageDir.exists()) {
+                    // Create AndroidExampleFolder at sdcard
+                    imageStorageDir.mkdirs();
+                }
+                // Create camera captured image file path and name
+                File file = new File(imageStorageDir + File.separator + "IMG_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+                mainActivity.mCapturedImageURI = Uri.fromFile(file);
+
             }
-            // Create camera captured image file path and name
 
-            //Toast.makeText(mainActivity.getApplicationContext(),imageStorageDir.toString(),Toast.LENGTH_LONG).show();
-            File file = new File(imageStorageDir, "IMG_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-            Uri providerURI = FileProvider.getUriForFile( mainActivity , mainActivity.getPackageName()+".provider" , file);
-            mainActivity.mCapturedImageURI = providerURI;
+            Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mainActivity.mCapturedImageURI);
 
-        }
-        else
-        {// API 24 미만 일경우..
-
-            File imageStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "fingerrate");
-            if (!imageStorageDir.exists()) {
-                // Create AndroidExampleFolder at sdcard
-                imageStorageDir.mkdirs();
-            }
-            // Create camera captured image file path and name
-            File file = new File(imageStorageDir + File.separator + "IMG_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-            mainActivity.mCapturedImageURI = Uri.fromFile(file);
-
-        }
-
-        Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mainActivity.mCapturedImageURI);
-
-        // 기본 선택 (카메라, 앨범)
-        Intent i = new Intent(Intent.ACTION_GET_CONTENT);
-        i.addCategory(Intent.CATEGORY_OPENABLE);
-        i.setType("image/*");
-        i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        // Create file chooser intent
-        Intent chooserIntent = Intent.createChooser(i, "Image Chooser");
-        // Set camera intent to file chooser
-        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Parcelable[]{captureIntent});
+            // 기본 선택 (카메라, 앨범)
+            Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+            i.addCategory(Intent.CATEGORY_OPENABLE);
+            i.setType("image/*");
+            if(!webView.getUrl().contains("mypage.php"))
+            i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            // Create file chooser intent
+            Intent chooserIntent = Intent.createChooser(i, "Image Chooser");
+            // Set camera intent to file chooser
+            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Parcelable[]{captureIntent});
+            mainActivity.startActivityForResult(chooserIntent, FILECHOOSER_LOLLIPOP_REQ_CODE);
 
 
-                // 갤러리 앨범 선택
+        // 갤러리 앨범 선택
            /*     Intent i = new Intent(Intent.ACTION_PICK);
                 i.setType("image/*");
                 i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
@@ -151,8 +156,6 @@ class ChromeManager extends WebChromeClient {
         Intent chooserIntent = Intent.createChooser(i, "Image Chooser");*/
 
         // On select image call onActivityResult method of activity
-        mainActivity.startActivityForResult(chooserIntent, FILECHOOSER_LOLLIPOP_REQ_CODE);
-
 
         return true;
     }
