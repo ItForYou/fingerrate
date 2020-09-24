@@ -35,7 +35,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 
-class ViewManager extends WebViewClient {
+class ViewManager extends WebViewClient{
 
     Activity context;
     MainActivity mainActivity;
@@ -59,8 +59,10 @@ class ViewManager extends WebViewClient {
                 }
 
                 else{
+
                     mainActivity.Yesrefresh();
                     mainActivity.flg_refresh=1;
+
                 }
 
            if(url.contains("intent")){
@@ -85,14 +87,13 @@ class ViewManager extends WebViewClient {
                }catch (URISyntaxException e) {
                    e.printStackTrace();
                }
-
            }
            else if(url.contains(mainActivity.getString(R.string.qrcode))){
               // Toast.makeText(mainActivity.getApplicationContext(), mainActivity.qr_url.toString(), Toast.LENGTH_SHORT).show();
                Glide.with(mainActivity)
                        .asBitmap()
                        .load(mainActivity.qr_url)
-                       .into(new CustomTarget<Bitmap>() {
+                       .into(new CustomTarget<Bitmap>(){
 
                            @Override
                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
@@ -207,8 +208,6 @@ class ViewManager extends WebViewClient {
                 Toast.makeText(mainActivity.getApplicationContext(), "Error while saving image!" + e.toString(), Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
             }
-
-
         }
     }
 
@@ -288,7 +287,4 @@ class ViewManager extends WebViewClient {
         notificationManager.notify(1234, builder.build()); // 고유숫자로 노티피케이션 동작시킴
 
     }
-
-
-
 }

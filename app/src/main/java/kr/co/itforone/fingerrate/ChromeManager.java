@@ -15,13 +15,8 @@ import android.webkit.JsResult;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
-import android.widget.Toast;
-
 
 import androidx.core.content.FileProvider;
-
-import com.theartofdev.edmodo.cropper.CropImage;
-import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
 
@@ -81,14 +76,9 @@ class ChromeManager extends WebChromeClient {
         return true;
     }
 
-
-
     // For Android 5.0+
     public boolean onShowFileChooser(  WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
-
-
-
-            mainActivity.filePathCallbackLollipop = filePathCallback;
+         mainActivity.filePathCallbackLollipop = filePathCallback;
 
             // 파일 선택
             // Create AndroidExampleFolder at sdcard
@@ -127,14 +117,12 @@ class ChromeManager extends WebChromeClient {
             Intent i = new Intent(Intent.ACTION_GET_CONTENT);
             i.addCategory(Intent.CATEGORY_OPENABLE);
             i.setType("image/*");
-            if(!webView.getUrl().contains("mypage.php"))
             i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
             // Create file chooser intent
             Intent chooserIntent = Intent.createChooser(i, "Image Chooser");
             // Set camera intent to file chooser
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Parcelable[]{captureIntent});
             mainActivity.startActivityForResult(chooserIntent, FILECHOOSER_LOLLIPOP_REQ_CODE);
-
 
         // 갤러리 앨범 선택
            /*     Intent i = new Intent(Intent.ACTION_PICK);
@@ -158,6 +146,7 @@ class ChromeManager extends WebChromeClient {
         // On select image call onActivityResult method of activity
 
         return true;
+
     }
     // 웹뷰 업로드 END
 

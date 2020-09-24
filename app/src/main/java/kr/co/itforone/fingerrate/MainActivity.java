@@ -75,7 +75,7 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
     @BindView(R.id.webView)    WebView webView;
-    @BindView(R.id.imgview)    ImageView imgview;
+  //@BindView(R.id.imgview)    ImageView imgview;
     @BindView(R.id.refreshlayout)    SwipeRefreshLayout refreshlayout;
   //  @BindView(R.id.cropImageView)    CropImageView cropImageView;
     private long backPrssedTime = 0;
@@ -166,23 +166,51 @@ public class MainActivity extends AppCompatActivity {
                      break;
                  }
 
+                case CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE: {
+
+                    CropImage.ActivityResult result = CropImage.getActivityResult(data);
+                    Uri resultUri = result.getUri();
+                    Uri[] arr_Uri = new Uri[1];
+                    arr_Uri[0] = resultUri;
+                    filePathCallbackLollipop.onReceiveValue(arr_Uri);
+                    filePathCallbackLollipop = null;
+                    break;
+
+                 }
+
                 case FILECHOOSER_LOLLIPOP_REQ_CODE: {
-                    Uri[] result = new Uri[0];
+
+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         // 이미지 다중선택 추가
-                        if (data!=null && data.getClipData() != null) {
-                            int cnt = data.getClipData().getItemCount();
+                        if (data!=null) {
+                             if(data.getClipData() != null){
+                                 Uri[] result = new Uri[0];
+                                 int cnt = data.getClipData().getItemCount();
 
-                            result = new Uri[cnt];
-                            for (int i = 0; i < cnt; i++) {
-                                result[i] = data.getClipData().getItemAt(i).getUri();
+                                 result = new Uri[cnt];
+                                 for (int i = 0; i < cnt; i++) {
+                                     result[i] = data.getClipData().getItemAt(i).getUri();
 
-                            }
+                                 }
+                                 filePathCallbackLollipop.onReceiveValue(result);
+                                 filePathCallbackLollipop = null;
+                                 return;
+                             }
+                            else {
+                                 Uri result = (data == null || resultCode != RESULT_OK) ? null : data.getData();
+                                 CropImage.activity(result)
+                                         .setAspectRatio(1,1)//가로 세로 1:1로 자르기 기능 * 1:1 4:3 16:9로 정해져 있어요
+                                         .setCropShape(CropImageView.CropShape.OVAL)
+                                         .start(this);
+                             }
                         } else {
-                            if(webView.getUrl().contains("mypage.php")){
-                               // Toast.makeText(this, mCapturedImageURI.toString(), Toast.LENGTH_SHORT).show();
 
-                                //cropImage();
+                            if(webView.getUrl().contains("mypage.php")){
+                                CropImage.activity(mCapturedImageURI)
+                                        .setAspectRatio(1,1)//가로 세로 1:1로 자르기 기능 * 1:1 4:3 16:9로 정해져 있어요
+                                        .setCropShape(CropImageView.CropShape.OVAL)
+                                        .start(this);
                             }
                             else{
                                 if (data == null)
@@ -195,8 +223,6 @@ public class MainActivity extends AppCompatActivity {
                                 return;
                             }
                         }
-                        filePathCallbackLollipop.onReceiveValue(result);
-                        filePathCallbackLollipop = null;
                     }
                     break;
                 }
@@ -237,16 +263,14 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 }
                 case CROP_FROM_ALBUM:
-
-                                if (data == null)
-                                    data = new Intent();
-                                if (data.getData() == null)
-                                    data.setData(mCapturedImageURI);
-
-                                //Toast.makeText(this,String.valueOf(), Toast.LENGTH_LONG).show();
-                                filePathCallbackLollipop.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
-                                filePathCallbackLollipop = null;
-                        break;
+                    if (data == null)
+                        data = new Intent();
+                    if (data.getData() == null)
+                        data.setData(mCapturedImageURI);
+                    //Toast.makeText(this,mCapturedImageURI.toString()+"2", Toast.LENGTH_LONG).show();
+                    filePathCallbackLollipop.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
+                    filePathCallbackLollipop = null;
+                    break;
                 default:  break;
             }
         } else {
@@ -263,16 +287,15 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    public void cropImage(){
-
+    public void cropImage(Uri uri){
 
         Intent intent = new Intent("com.android.camera.action.CROP");
 
-        intent.setDataAndType(mCapturedImageURI , "image/*");
+        intent.setDataAndType(uri , "image/*");
         intent.putExtra("aspectX", 1);
         intent.putExtra("aspectY", 1);
         intent.putExtra("scale", true);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, mCapturedImageURI);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
         /**
          * getUriforFile()이 return한 content URI에 대한 접근권한을 승인하려면 grantUriPermission을 호출한다.
          * mode_flags 파라미터의 값에 따라. 지정한 패키지에 대해 content URI를 위한 임시 접근을 승인한다.
@@ -281,79 +304,16 @@ public class MainActivity extends AppCompatActivity {
          */
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        grantUriPermission( getPackageName(), mCapturedImageURI , Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
+        grantUriPermission( getPackageName(), uri , Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         startActivityForResult(intent, CROP_FROM_ALBUM);
 
     }
 
-  /*  public void cropImage2() {
-        this.grantUriPermission("com.android.camera", mCapturedImageURI,
-                Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        Intent intent = new Intent("com.android.camera.action.CROP");
-        intent.setDataAndType(mCapturedImageURI, "image/*");
-
-        List<ResolveInfo> list = getPackageManager().queryIntentActivities(intent, 0);
-        grantUriPermission(list.get(0).activityInfo.packageName, mCapturedImageURI,
-                Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        int size = list.size();
-        if (size == 0) {
-            Toast.makeText(this, "취소 되었습니다.", Toast.LENGTH_SHORT).show();
-            return;
-        } else {
-            Toast.makeText(this, "용량이 큰 사진의 경우 시간이 오래 걸릴 수 있습니다.", Toast.LENGTH_SHORT).show();
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            intent.putExtra("crop", "true");
-            intent.putExtra("aspectX", 4);
-            intent.putExtra("aspectY", 3);
-            intent.putExtra("scale", true);
-            File croppedFileName = null;
-
-                File imageStorageDir = new File(getFilesDir() + "/Pictures", "fingerrate");
-                if (!imageStorageDir.exists()) {
-                    // Create AndroidExampleFolder at sdcard
-                    imageStorageDir.mkdirs();
-                }
-                // Create camera captured image file path and name
-
-                //Toast.makeText(mainActivity.getApplicationContext(),imageStorageDir.toString(),Toast.LENGTH_LONG).show();
-            croppedFileName = new File(imageStorageDir, "IMG_" + String.valueOf(System.currentTimeMillis()) + ".jpg");
-
-            File tempFile = new File(imageStorageDir.toString(), croppedFileName.getName());
-
-            mCapturedImageURI = FileProvider.getUriForFile(MainActivity.this,
-                    getPackageName() + ".provider", tempFile);
-
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-
-
-            intent.putExtra("return-data", false);
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, mCapturedImageURI);
-            intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString()); //Bitmap 형태로 받기 위해 해당 작업 진행
-
-            Intent i = new Intent(intent);
-            ResolveInfo res = list.get(0);
-            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            i.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            grantUriPermission(res.activityInfo.packageName, mCapturedImageURI,
-                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-            i.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
-            startActivityForResult(i, CROP_FROM_ALBUM);
-
-
-        }
-
-    }*/
-
-
-
     @SuppressLint("MissingPermission")
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
@@ -523,9 +483,9 @@ public class MainActivity extends AppCompatActivity {
                 else{
                     refreshlayout.setEnabled(false);
                 }
-
             }
         });
+
 //구글로그인
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))

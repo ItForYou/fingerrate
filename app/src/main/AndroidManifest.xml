@@ -32,8 +32,8 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/filepaths"/>
         </provider>
-
-
+        <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+            android:theme="@style/Base.Theme.AppCompat"/>
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait"
@@ -48,9 +48,6 @@
 
             </intent-filter>
         </activity>
-<!--        크롭 인텐트-->
-        <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
-            android:theme="@style/Base.Theme.AppCompat"/>
         <activity
             android:name=".ResultActivity"
             android:screenOrientation="portrait"
@@ -74,9 +71,6 @@
             android:name=".pushActivity"
             android:screenOrientation="portrait"
             />
-
-
-
         <service
             android:name=".My_Firebase_Messaging_Service"
             >
