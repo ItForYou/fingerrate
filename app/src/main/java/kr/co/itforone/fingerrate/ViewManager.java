@@ -200,11 +200,9 @@ class ViewManager extends WebViewClient{
 
         if(webView.getHeight()>2500) {
             height = (int)(webView.getHeight() - (webView.getHeight() * 0.32));
-            Toast.makeText(mainActivity, "-0.32", Toast.LENGTH_SHORT).show();
         }
         else {
             height = webView.getHeight();
-            Toast.makeText(mainActivity, "-0", Toast.LENGTH_SHORT).show();
         }
         //height = webView.getHeight();
 
