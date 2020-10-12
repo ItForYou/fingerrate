@@ -9,11 +9,30 @@
     tools:context=".MainActivity">
 
 
-
+<FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:weightSum="1"
+        android:orientation="vertical"
+        >
     <WebView
         android:id="@+id/webView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:visibility="visible"
+        />
+   <!-- <include
+        android:id="@+id/include_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        layout="@layout/activity_qrcode"
+
+        >
+    </include>-->
+
 <!--        <ImageView-->
 <!--            android:id="@+id/imgview"-->
 <!--            android:layout_width="200dp"-->
@@ -25,6 +44,76 @@
           android:layout_width="match_parent"
           android:layout_height="wrap_content"/>-->
 
+<!--    <LinearLayout-->
+<!--        android:id="@+id/qrlayout"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:orientation="vertical"-->
+<!--        android:weightSum="1"-->
+<!--        android:background="#362de4"-->
+<!--        android:visibility="gone">-->
 
 
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="0dp"-->
+<!--            android:layout_weight="0.1"-->
+<!--            >-->
+<!--            <FrameLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent"-->
+<!--                >-->
+
+<!--                <ImageView-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="match_parent"-->
+<!--                    android:src="@drawable/logo_w"-->
+<!--                    android:layout_gravity="center"-->
+<!--                    android:padding="15dp"-->
+
+<!--                    />-->
+<!--            </FrameLayout>-->
+<!--        </LinearLayout>-->
+
+<!--        <FrameLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="0dp"-->
+<!--            android:layout_weight="0.6"-->
+<!--            >-->
+
+<!--            <ImageView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:src="@drawable/qrcode"-->
+<!--                android:padding="70dp"-->
+<!--                android:layout_gravity="center"-->
+<!--                />-->
+<!--            <ImageView-->
+<!--                android:id="@+id/qrcode"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:src="@drawable/logo"-->
+<!--                android:layout_gravity="center"-->
+<!--                />-->
+<!--        </FrameLayout>-->
+<!--        <FrameLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="0dp"-->
+<!--            android:layout_weight="0.1"-->
+<!--            >-->
+
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:text="테스트 키친"-->
+<!--                android:textColor="@android:color/white"-->
+<!--                android:layout_gravity="center"-->
+<!--                android:textStyle="bold"-->
+<!--                android:textSize="25dp"-->
+<!--                />-->
+<!--        </FrameLayout>-->
+<!--    </LinearLayout>-->
+
+    </LinearLayout>
+</FrameLayout>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

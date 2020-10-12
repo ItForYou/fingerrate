@@ -42,6 +42,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -77,7 +78,10 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.webView)    WebView webView;
   //@BindView(R.id.imgview)    ImageView imgview;
     @BindView(R.id.refreshlayout)    SwipeRefreshLayout refreshlayout;
+  //  @BindView(R.id.qrlayout)    LinearLayout qrlayout;
+   // @BindView(R.id.qrcode)    ImageView qrcode;
   //  @BindView(R.id.cropImageView)    CropImageView cropImageView;
+
     private long backPrssedTime = 0;
     static final int PERMISSION_REQUEST_CODE = 1;
     private static final int RC_SIGN_IN = 9001;
@@ -488,7 +492,7 @@ public class MainActivity extends AppCompatActivity {
 
 //구글로그인
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestIdToken("748525500524-9d73q1769i18tfke7c6bpbgd0p1eenlk.apps.googleusercontent.com")
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);

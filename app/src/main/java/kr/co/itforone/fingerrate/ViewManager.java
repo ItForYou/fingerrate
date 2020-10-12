@@ -9,6 +9,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Picture;
+import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaScannerConnection;
@@ -16,6 +18,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -89,8 +92,9 @@ class ViewManager extends WebViewClient{
                }
            }
            else if(url.contains(mainActivity.getString(R.string.qrcode))){
+
               // Toast.makeText(mainActivity.getApplicationContext(), mainActivity.qr_url.toString(), Toast.LENGTH_SHORT).show();
-               Glide.with(mainActivity)
+           /*    Glide.with(mainActivity)
                        .asBitmap()
                        .load(mainActivity.qr_url)
                        .into(new CustomTarget<Bitmap>(){
@@ -106,6 +110,7 @@ class ViewManager extends WebViewClient{
                                    //Toast.makeText(mainActivity.getApplicationContext(), "Saving Image...", Toast.LENGTH_SHORT).show();
                                    saveImage(bitmap, dirPath, file_name);
 
+
                            }
 
                            @Override
@@ -113,6 +118,19 @@ class ViewManager extends WebViewClient{
 
                                  }
                              });
+*/
+
+
+               Bitmap bitmap = CaptureWebView(mainActivity.webView);
+               if(bitmap!=null) {
+                   String dirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
+                           + File.separator + mainActivity.getString(R.string.app_name) + File.separator;
+                   //   Toast.makeText(mainActivity.getApplicationContext(), dirPath, Toast.LENGTH_SHORT).show();
+                   String file_name = System.currentTimeMillis() + ".jpg";
+                   //Toast.makeText(mainActivity.getApplicationContext(), "Saving Image...", Toast.LENGTH_SHORT).show();
+                   saveImage(bitmap, dirPath, file_name);
+               }
+
 
 
 
@@ -169,6 +187,35 @@ class ViewManager extends WebViewClient{
     public void onPageFinished(WebView view, String url) {
         super.onPageFinished(view, url);
          view.loadUrl("javascript:setToken('"+mainActivity.token+"')");
+    }
+
+    private Bitmap CaptureWebView(WebView webView)
+    {
+
+        //Toast.makeText(mainActivity.getApplicationContext(), String.valueOf(webView.getHeight()), Toast.LENGTH_SHORT).show();
+        Display display = mainActivity.getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int height = 0;
+
+        if(webView.getHeight()>2500) {
+            height = (int)(webView.getHeight() - (webView.getHeight() * 0.32));
+            Toast.makeText(mainActivity, "-0.32", Toast.LENGTH_SHORT).show();
+        }
+        else {
+            height = webView.getHeight();
+            Toast.makeText(mainActivity, "-0", Toast.LENGTH_SHORT).show();
+        }
+        //height = webView.getHeight();
+
+        /*Log.d("height_capture",String.valueOf(height));
+        Log.d("height_origin",String.valueOf(webView.getHeight()));
+*/
+        Bitmap bitmap = Bitmap.createBitmap(webView.getWidth(),height,Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        webView.draw(canvas);
+
+        return bitmap;
     }
 
     private void saveImage(Bitmap image, String storageDir, String imageFileName) {
