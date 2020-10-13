@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/app.iml" group="fingerrate/app" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fingerrate.iml" filepath="$PROJECT_DIR$/.idea/modules/fingerrate.iml" group="fingerrate" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/fingerrate.iml" filepath="$PROJECT_DIR$/.idea/modules/fingerrate.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/fingerrate.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/fingerrate.app.iml" />
     </modules>
   </component>
 </project>

@@ -55,17 +55,13 @@ class ViewManager extends WebViewClient{
         //Toast.makeText(mainActivity.getApplicationContext(),url, Toast.LENGTH_LONG).show();
 
                 if(url.contains("search_tes_view.php") || url.contains("place_view.php") || url.contains("search_tes.php")){
-
                     mainActivity.Norefresh();
                     mainActivity.flg_refresh=0;
-
                 }
 
                 else{
-
                     mainActivity.Yesrefresh();
                     mainActivity.flg_refresh=1;
-
                 }
 
            if(url.contains("intent")){
@@ -193,30 +189,49 @@ class ViewManager extends WebViewClient{
     {
 
         //Toast.makeText(mainActivity.getApplicationContext(), String.valueOf(webView.getHeight()), Toast.LENGTH_SHORT).show();
+
         Display display = mainActivity.getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
         int height = 0;
 
-        if(webView.getHeight()>2500) {
-            height = (int)(webView.getHeight() - (webView.getHeight() * 0.32));
+       /// height = (int)(webView.getHeight() - (webView.getHeight() * 0.335));
+        double dp_ratio = (double)((double)size.y/(double)size.x);
+
+        /*
+        {s10 s105g note4} ratio
+        1.890740740740741
+        1.897916666666667
+        1.777777777777778
+        */
+
+        if(dp_ratio>1.89) {
+            height = (int)(webView.getHeight() - (webView.getHeight() * 0.44));
         }
         else {
-            height = webView.getHeight();
+            height = (int)(webView.getHeight() - (webView.getHeight() * 0.285));
         }
-        //height = webView.getHeight();
 
-        /*Log.d("height_capture",String.valueOf(height));
+        /*
+        Log.d("height_capture",String.valueOf(height));
         Log.d("height_origin",String.valueOf(webView.getHeight()));
-*/
+
+        Log.d("dp_X",String.valueOf(size.x));
+        Log.d("dp_Y",String.valueOf(size.y));
+        Log.d("dp_ratio",String.valueOf(dp_ratio));
+         */
+
+        //Toast.makeText(mainActivity.getApplicationContext(), size.x+","+size.y + "//" + webView.getWidth() + "," + webView.getHeight(), Toast.LENGTH_SHORT).show();
+
         Bitmap bitmap = Bitmap.createBitmap(webView.getWidth(),height,Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
+        webView.scrollTo(0,0);
         webView.draw(canvas);
 
         return bitmap;
     }
 
-    private void saveImage(Bitmap image, String storageDir, String imageFileName) {
+    private void saveImage(Bitmap image, String storageDir, String imageFileName){
 
 
             File imageFile = new File(storageDir, imageFileName);
@@ -253,6 +268,7 @@ class ViewManager extends WebViewClient{
                 Toast.makeText(mainActivity.getApplicationContext(), "Error while saving image!" + e.toString(), Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
             }
+
         }
     }
 
