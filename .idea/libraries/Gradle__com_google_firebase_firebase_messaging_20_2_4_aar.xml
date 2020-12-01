@@ -4,6 +4,15 @@
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/988cd8392e852e29b7c147f1aefeadb5/jetified-firebase-messaging-20.2.4/AndroidManifest.xml" />
       <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/988cd8392e852e29b7c147f1aefeadb5/jetified-firebase-messaging-20.2.4/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/988cd8392e852e29b7c147f1aefeadb5/jetified-firebase-messaging-20.2.4/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/62239e9201d9da6dd6b2fbd8e88d7c37/jetified-firebase-messaging-20.2.4/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/62239e9201d9da6dd6b2fbd8e88d7c37/jetified-firebase-messaging-20.2.4/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/62239e9201d9da6dd6b2fbd8e88d7c37/jetified-firebase-messaging-20.2.4/jars/classes.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/d7aab5cfad447a621d0566083e783e78/jetified-firebase-messaging-20.2.4/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/d7aab5cfad447a621d0566083e783e78/jetified-firebase-messaging-20.2.4/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/d7aab5cfad447a621d0566083e783e78/jetified-firebase-messaging-20.2.4/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/8636403fb50ceb0b852b5719fa72ce61/jetified-firebase-messaging-20.2.4/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/8636403fb50ceb0b852b5719fa72ce61/jetified-firebase-messaging-20.2.4/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/8636403fb50ceb0b852b5719fa72ce61/jetified-firebase-messaging-20.2.4/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.firebase/firebase-messaging/20.2.4/794c2144941293a535b2d38d12dee5b6902a7f2a/firebase-messaging-20.2.4-javadoc.jar!/" />

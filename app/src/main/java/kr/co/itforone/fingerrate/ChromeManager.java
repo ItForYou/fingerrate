@@ -24,6 +24,7 @@ class ChromeManager extends WebChromeClient {
     Activity activity;
     MainActivity mainActivity;
     static final int FILECHOOSER_LOLLIPOP_REQ_CODE=1300;
+
     public ChromeManager(Activity activity, MainActivity mainActivity) {
         this.mainActivity = mainActivity;
         this.activity = activity;

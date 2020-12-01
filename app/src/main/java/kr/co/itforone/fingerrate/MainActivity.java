@@ -333,6 +333,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (push.getStringExtra("goUrl") != null)
             pushurl = push.getStringExtra("goUrl");
+
         else{
             Uri data = push.getData();
             if(data!=null) {
@@ -498,6 +499,7 @@ public class MainActivity extends AppCompatActivity {
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
+
     }
 //파이어베이스 동기화
     private void firebaseAuthWithGoogle(String idToken) {
