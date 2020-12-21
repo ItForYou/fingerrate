@@ -1,4 +1,4 @@
-package kr.co.itforone.fingerrate;
+package kr.co.itforone.fingerrate.volley;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -7,7 +7,7 @@ import com.android.volley.toolbox.StringRequest;
 import java.util.HashMap;
 import java.util.Map;
 
-class Requestpush extends StringRequest {
+public class Requestpush extends StringRequest {
     private static final String URL = "http://14.48.175.176/~fingerrate/bbs/fcm_location.php";
     private Map<String, String> parameters = new HashMap();
 

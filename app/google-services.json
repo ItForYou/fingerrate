@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "904671899514-tkf576vd1qeh0am115rhdt3vgqc7566f.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "kr.co.itforone.fingerrate",
+            "certificate_hash": "425ff99dcb7a1f7ed5e104d61be0957bd0897f60"
+          }
+        },
+        {
           "client_id": "904671899514-57lftd30k5emcegtqlj4j6d0ld3c5skr.apps.googleusercontent.com",
           "client_type": 3
         }
